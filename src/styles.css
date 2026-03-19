@@ -1826,3 +1826,975 @@
   .benefit-card         { padding: 1.5rem; }
   .coastal-cta-section  { padding: 5rem 1rem; }
 }
+
+/* =====================================================
+   BOOKING PAGE — PREMIUM REDESIGN
+   All classes prefixed with "bk-" to avoid conflicts
+   with legacy booking-* classes above.
+   ===================================================== */
+
+/* ── Spinner keyframe ─────────────────────────────────── */
+@keyframes bk-spin {
+  to { transform: rotate(360deg); }
+}
+.spinning { animation: bk-spin 0.8s linear infinite; }
+
+/* ── Page-level overrides ─────────────────────────────── */
+/* Override the legacy .booking-page padding for the new layout */
+.booking-page {
+  min-height: 100vh;
+  background-color: var(--sand-50);
+  padding: 0;            /* header/sections manage their own spacing */
+}
+
+/* ── Page header ──────────────────────────────────────── */
+.bk-page-header {
+  background: linear-gradient(135deg, var(--coastal-900) 0%, var(--coastal-800) 100%);
+  padding: 3.5rem 0 3rem;
+  text-align: center;
+}
+.bk-page-kicker {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--coastal-400);
+  margin-bottom: 0.75rem;
+}
+.bk-page-title {
+  font-size: clamp(1.75rem, 4vw, 2.5rem);
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+.bk-page-subtitle {
+  margin-top: 0.75rem;
+  font-size: 1.0625rem;
+  color: #93c5fd;
+  max-width: 34rem;
+  margin-left: auto;
+  margin-right: auto;
+  line-height: 1.6;
+}
+
+/* ── 4-step process section ───────────────────────────── */
+.bk-process-section {
+  background-color: #fff;
+  border-bottom: 1px solid var(--gray-100);
+  padding: 2.5rem 0;
+}
+.bk-process-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+@media (min-width: 768px) {
+  .bk-process-steps {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 0;
+  }
+}
+
+/* Single step */
+.bk-process-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  flex: 1;
+}
+@media (min-width: 768px) {
+  .bk-process-step {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 0.75rem;
+  }
+}
+
+/* Step icon ring */
+.bk-process-icon-wrap {
+  position: relative;
+  width: 3.25rem;
+  height: 3.25rem;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--coastal-800), var(--coastal-600));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(30, 95, 142, 0.25);
+}
+.bk-process-icon {
+  width: 1.375rem;
+  height: 1.375rem;
+  color: #fff;
+}
+.bk-process-num {
+  position: absolute;
+  top: -0.375rem;
+  right: -0.375rem;
+  width: 1.125rem;
+  height: 1.125rem;
+  background-color: var(--amber-500);
+  color: #fff;
+  font-size: 0.5625rem;
+  font-weight: 800;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.bk-process-text { flex: 1; }
+@media (min-width: 768px) {
+  .bk-process-text { flex: none; }
+}
+.bk-process-title {
+  font-weight: 700;
+  font-size: 0.9375rem;
+  color: var(--gray-900);
+  margin-bottom: 0.25rem;
+}
+.bk-process-desc {
+  font-size: 0.8125rem;
+  color: var(--gray-500);
+  line-height: 1.55;
+}
+
+/* Arrow between steps (desktop only) */
+.bk-process-arrow {
+  display: none;
+  flex-shrink: 0;
+  color: var(--gray-300);
+  width: 1.25rem;
+  height: 1.25rem;
+  margin-top: 1rem;
+  align-self: flex-start;
+}
+@media (min-width: 768px) {
+  .bk-process-arrow { display: block; }
+}
+
+/* ── Main form area ───────────────────────────────────── */
+.bk-main {
+  padding: 2.5rem 0 4rem;
+}
+.bk-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  max-width: 56rem;
+  margin: 0 auto;
+}
+
+/* ── Section card ─────────────────────────────────────── */
+.bk-section {
+  background-color: #fff;
+  border-radius: 1.25rem;
+  border: 1px solid var(--gray-100);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 4px 16px rgba(0, 0, 0, 0.03);
+  padding: 1.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+@media (min-width: 640px) {
+  .bk-section { padding: 2rem; }
+}
+
+/* Section header row */
+.bk-section-hd {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+.bk-section-icon-ring {
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 0.75rem;
+  background: linear-gradient(135deg, var(--blue-50), var(--indigo-50));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border: 1px solid var(--blue-100);
+}
+.bk-section-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  color: var(--blue-600);
+}
+.bk-section-title {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--gray-900);
+  margin-bottom: 0.125rem;
+}
+.bk-section-sub {
+  font-size: 0.8125rem;
+  color: var(--gray-500);
+}
+
+/* ── Field wrappers ───────────────────────────────────── */
+.bk-fields-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0;   /* connector handles spacing */
+}
+.bk-fields-row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+@media (min-width: 640px) {
+  .bk-fields-row { grid-template-columns: 1fr 1fr; }
+}
+@media (min-width: 900px) {
+  .bk-fields-row { grid-template-columns: 1fr 1fr auto; }
+}
+
+.bk-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+.bk-field--narrow { max-width: 28rem; }
+
+/* ── Labels ───────────────────────────────────────────── */
+.bk-label {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--gray-700);
+}
+.bk-label-icon {
+  width: 0.9375rem;
+  height: 0.9375rem;
+  color: var(--blue-500);
+  flex-shrink: 0;
+}
+
+/* ── Inputs ───────────────────────────────────────────── */
+/* Override / extend legacy .booking-input with bk- namespace */
+.bk-input {
+  width: 100%;
+  padding: 0.8125rem 1rem;
+  border: 1.5px solid var(--gray-200);
+  border-radius: 0.75rem;
+  font-size: 0.9375rem;
+  color: var(--gray-900);
+  outline: none;
+  font-family: inherit;
+  box-sizing: border-box;
+  background-color: #fff;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.bk-input::placeholder { color: var(--gray-400); }
+.bk-input:focus {
+  border-color: var(--blue-400);
+  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.15);
+}
+.bk-input--err {
+  border-color: #ef4444;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+.bk-field-err {
+  font-size: 0.8125rem;
+  color: #dc2626;
+  margin: 0;
+}
+
+/* ── Google Places Autocomplete dropdown ──────────────── */
+/*
+  .pac-container is appended to <body> by Google Maps, so it is
+  never clipped by overflow:hidden on parent elements.
+  These rules override the default Google styling to match the
+  premium booking page aesthetic.
+*/
+.pac-container {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  border: 1.5px solid var(--gray-200);
+  border-radius: 0.875rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+  margin-top: 4px;
+  z-index: 9999;   /* always above form cards and map */
+}
+/* Remove the "Powered by Google" logo row padding quirk */
+.pac-container::after { margin: 0; padding: 6px 12px; }
+
+.pac-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1rem;
+  border-top: 1px solid var(--gray-100);
+  font-size: 0.875rem;
+  line-height: 1.4;
+  cursor: pointer;
+  transition: background-color 0.1s;
+}
+.pac-item:first-child { border-top: none; }
+.pac-item:hover,
+.pac-item-selected   { background-color: var(--blue-50); }
+
+/* The main place name (e.g. "Split", "Dubrovnik Old Town") */
+.pac-item-query {
+  font-weight: 700;
+  color: var(--gray-900);
+  font-size: 0.9rem;
+}
+/* The secondary text (e.g. "Croatia" or "Split, Croatia") */
+.pac-item span:not(.pac-item-query):not(.pac-icon) {
+  color: var(--gray-500);
+  font-size: 0.8rem;
+}
+
+/* Replace the default Google pin icon with a smaller, cleaner one */
+.pac-icon {
+  width: 14px !important;
+  height: 20px !important;
+  background-image: none !important;
+  flex-shrink: 0;
+}
+.pac-icon::before {
+  content: '';
+  display: block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50% 50% 50% 0;
+  background-color: var(--blue-400);
+  transform: rotate(-45deg);
+  margin: 4px auto 0;
+}
+
+/* Subtle label hint ("type and select from the list") */
+.bk-label-hint {
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: var(--gray-400);
+  margin-left: 0.25rem;
+}
+
+/* ── Route connector visual ───────────────────────────── */
+.bk-route-connector {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0;
+}
+.bk-route-line {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(to right, transparent, var(--gray-200), transparent);
+}
+.bk-route-nav-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  color: var(--blue-400);
+  flex-shrink: 0;
+}
+
+/* ── Map container ────────────────────────────────────── */
+/*
+  Always rendered — shows Croatia overview on load, then pins
+  and route as locations are selected.
+  NEVER use display:none on .bk-map-canvas: Leaflet needs a
+  visible element with real pixel dimensions to initialise.
+*/
+.bk-map-wrap {
+  position: relative;
+  border-radius: 1rem;
+  overflow: hidden;
+  border: 1px solid var(--gray-200);
+  background-color: var(--gray-50);
+  height: 280px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+}
+@media (min-width: 640px)  { .bk-map-wrap { height: 340px; } }
+@media (min-width: 1024px) { .bk-map-wrap { height: 400px; } }
+
+/* The Google Map div — fills the container, always visible */
+.bk-map-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* Centred overlay states */
+.bk-map-state,
+.bk-map-hint {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.625rem;
+  font-size: 0.875rem;
+  color: var(--gray-500);
+  background-color: var(--gray-50);
+  text-align: center;
+  padding: 1rem;
+}
+.bk-map-state-icon {
+  width: 2rem;
+  height: 2rem;
+  color: var(--blue-400);
+}
+.bk-map-state--err .bk-map-state-icon { color: #ef4444; }
+.bk-map-hint-icon {
+  width: 1.75rem;
+  height: 1.75rem;
+  color: var(--gray-300);
+}
+.bk-map-hint p {
+  max-width: 18rem;
+  color: var(--gray-400);
+  line-height: 1.55;
+}
+
+/* Loading overlay (appears over the map while route is calculated) */
+.bk-map-loading {
+  position: absolute;
+  bottom: 0.75rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(4px);
+  padding: 0.5rem 1rem;
+  border-radius: 9999px;
+  font-size: 0.8125rem;
+  color: var(--gray-600);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+.bk-map-loading svg { width: 1rem; height: 1rem; color: var(--blue-500); }
+
+/* Route error inline */
+.bk-map-route-err {
+  position: absolute;
+  bottom: 0.75rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #fff1f2;
+  border: 1px solid #fecdd3;
+  padding: 0.5rem 1rem;
+  border-radius: 9999px;
+  font-size: 0.8125rem;
+  color: #dc2626;
+  white-space: nowrap;
+}
+.bk-map-route-err svg { width: 1rem; height: 1rem; flex-shrink: 0; }
+
+/* Route info bar — sits below the map canvas */
+.bk-route-info {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(6px);
+  padding: 0.625rem 1.5rem;
+  border-top: 1px solid var(--gray-100);
+}
+.bk-route-info-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.125rem;
+}
+.bk-route-info-label {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--gray-400);
+}
+.bk-route-info-val {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--coastal-800);
+}
+.bk-route-info-sep {
+  width: 1px;
+  height: 2rem;
+  background-color: var(--gray-200);
+}
+
+/* ── Passengers control ───────────────────────────────── */
+.bk-pax-ctrl {
+  display: flex;
+  align-items: center;
+  border: 1.5px solid var(--gray-200);
+  border-radius: 0.75rem;
+  overflow: hidden;
+  height: 3rem;
+  width: fit-content;
+  min-width: 8rem;
+}
+.bk-pax-btn {
+  flex: 0 0 2.75rem;
+  height: 100%;
+  background: var(--gray-50);
+  border: none;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--gray-600);
+  cursor: pointer;
+  transition: background-color 0.15s, color 0.15s;
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.bk-pax-btn:hover:not(:disabled) {
+  background-color: var(--blue-50);
+  color: var(--blue-600);
+}
+.bk-pax-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+.bk-pax-val {
+  flex: 1;
+  text-align: center;
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--gray-900);
+  border-left: 1px solid var(--gray-200);
+  border-right: 1px solid var(--gray-200);
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.5rem;
+}
+
+/* ── Extras grid ──────────────────────────────────────── */
+.bk-extras-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+@media (min-width: 640px) {
+  .bk-extras-grid { grid-template-columns: repeat(4, 1fr); }
+}
+
+.bk-extra-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 1.125rem 0.75rem;
+  border: 1.5px solid var(--gray-150, #eaeef3);
+  border-radius: 1rem;
+  background-color: #fff;
+  cursor: pointer;
+  font-family: inherit;
+  text-align: center;
+  transition: border-color 0.15s, background-color 0.15s, box-shadow 0.15s;
+  position: relative;
+}
+.bk-extra-card:hover {
+  border-color: var(--blue-300);
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.08);
+}
+.bk-extra-card--on {
+  border-color: var(--blue-500);
+  background-color: var(--blue-50);
+  box-shadow: 0 2px 12px rgba(37, 99, 235, 0.12);
+}
+
+/* Extra icon ring */
+.bk-extra-icon-ring {
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 50%;
+  background-color: var(--gray-100);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.15s;
+}
+.bk-extra-icon-ring--on {
+  background: linear-gradient(135deg, var(--blue-500), var(--indigo-600));
+}
+.bk-extra-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  color: var(--gray-500);
+  transition: color 0.15s;
+}
+.bk-extra-icon-ring--on .bk-extra-icon { color: #fff; }
+
+.bk-extra-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+.bk-extra-label {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--gray-800);
+}
+.bk-extra-desc {
+  font-size: 0.6875rem;
+  color: var(--gray-400);
+  line-height: 1.4;
+}
+
+/* Checkmark badge — top-right corner */
+.bk-extra-check {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  width: 1.25rem;
+  height: 1.25rem;
+  color: var(--blue-500);
+  opacity: 0;
+  transform: scale(0.6);
+  transition: opacity 0.15s, transform 0.15s;
+}
+.bk-extra-check svg { width: 100%; height: 100%; }
+.bk-extra-check--on {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* ── Submit panel ─────────────────────────────────────── */
+.bk-submit-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+/* "No payment now" notice */
+.bk-submit-notice {
+  display: flex;
+  gap: 0.875rem;
+  background: linear-gradient(135deg, #fffbeb, #fef3c7);
+  border: 1px solid #fde68a;
+  border-radius: 1rem;
+  padding: 1.125rem 1.25rem;
+  font-size: 0.875rem;
+  color: #78350f;
+  line-height: 1.6;
+}
+.bk-submit-notice-icon {
+  width: 1.375rem;
+  height: 1.375rem;
+  color: #d97706;
+  flex-shrink: 0;
+  margin-top: 0.125rem;
+}
+.bk-submit-notice strong {
+  display: block;
+  margin-bottom: 0.25rem;
+  color: #92400e;
+  font-size: 0.9375rem;
+}
+.bk-submit-notice p { margin: 0; }
+
+/* Submit error */
+.bk-submit-err {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: #fff1f2;
+  border: 1px solid #fecdd3;
+  border-radius: 0.75rem;
+  padding: 0.875rem 1rem;
+  font-size: 0.875rem;
+  color: #dc2626;
+}
+.bk-submit-err svg { width: 1.125rem; height: 1.125rem; flex-shrink: 0; }
+
+/* Primary submit button */
+.bk-submit-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.625rem;
+  background: linear-gradient(135deg, var(--coastal-800), var(--coastal-600));
+  color: #fff;
+  font-size: 1.0625rem;
+  font-weight: 700;
+  padding: 1.0625rem 2rem;
+  border: none;
+  border-radius: 9999px;
+  cursor: pointer;
+  font-family: inherit;
+  letter-spacing: 0.01em;
+  box-shadow: 0 4px 16px rgba(15, 43, 61, 0.3);
+  transition: opacity 0.15s, box-shadow 0.15s, transform 0.1s;
+}
+.bk-submit-btn:hover:not(:disabled) {
+  opacity: 0.9;
+  box-shadow: 0 6px 20px rgba(15, 43, 61, 0.35);
+  transform: translateY(-1px);
+}
+.bk-submit-btn:active:not(:disabled) { transform: translateY(0); }
+.bk-submit-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+.bk-submit-btn svg { width: 1.25rem; height: 1.25rem; }
+
+.bk-submit-footer {
+  text-align: center;
+  font-size: 0.75rem;
+  color: var(--gray-400);
+  margin: 0;
+}
+
+/* ── Success screen ───────────────────────────────────── */
+.bk-success-wrap {
+  min-height: 80vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1rem;
+}
+.bk-success-card {
+  background: #fff;
+  border-radius: 1.5rem;
+  border: 1px solid var(--gray-100);
+  box-shadow: 0 4px 32px rgba(0, 0, 0, 0.07);
+  padding: 2.5rem 2rem;
+  max-width: 30rem;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 1.25rem;
+}
+@media (min-width: 480px) { .bk-success-card { padding: 3rem 2.5rem; } }
+
+.bk-success-icon-ring {
+  width: 5rem;
+  height: 5rem;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #dcfce7, #bbf7d0);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.bk-success-icon {
+  width: 2.5rem;
+  height: 2.5rem;
+  color: #16a34a;
+}
+.bk-success-title {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--gray-900);
+  margin: 0;
+}
+.bk-success-body {
+  font-size: 0.9375rem;
+  color: var(--gray-500);
+  line-height: 1.6;
+  margin: 0;
+}
+.bk-success-summary {
+  width: 100%;
+  background-color: var(--sand-50);
+  border: 1px solid var(--sand-100);
+  border-radius: 1rem;
+  padding: 1.125rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+  text-align: left;
+}
+.bk-success-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 0.875rem;
+  gap: 0.75rem;
+}
+.bk-success-row-label { color: var(--gray-400); flex-shrink: 0; }
+.bk-success-row-val   { font-weight: 600; color: var(--gray-800); text-align: right; word-break: break-word; }
+
+.bk-success-notice {
+  display: flex;
+  gap: 0.75rem;
+  background-color: var(--blue-50);
+  border: 1px solid var(--blue-100);
+  border-radius: 0.875rem;
+  padding: 1rem 1.125rem;
+  font-size: 0.8125rem;
+  color: var(--gray-600);
+  line-height: 1.55;
+  text-align: left;
+  width: 100%;
+}
+.bk-success-notice-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  color: var(--blue-500);
+  flex-shrink: 0;
+  margin-top: 0.125rem;
+}
+.bk-success-notice p { margin: 0; }
+.bk-success-notice strong { color: var(--gray-800); }
+
+/* ── Mobile tightening ────────────────────────────────── */
+@media (max-width: 479px) {
+  .bk-section          { padding: 1.25rem; gap: 1.25rem; }
+  .bk-extras-grid      { gap: 0.5rem; }
+  .bk-extra-card       { padding: 0.875rem 0.5rem; }
+  .bk-process-section  { padding: 1.75rem 0; }
+  .bk-process-step     { gap: 0.75rem; }
+  .bk-process-icon-wrap{ width: 2.75rem; height: 2.75rem; }
+}
+
+/* =====================================================
+   PLACE AUTOCOMPLETE COMBOBOX
+   ===================================================== */
+
+/* Combobox container — provides the anchor for the absolute dropdown */
+.place-ac {
+  position: relative;
+}
+
+/* Input + spinner wrapper */
+.place-ac-wrap {
+  position: relative;
+}
+
+/* Loading spinner — sits inside the right side of the input */
+.place-ac-spin {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 1rem;
+  height: 1rem;
+  color: var(--blue-500);
+  pointer-events: none;
+}
+
+/* Dropdown list */
+.place-ac-list {
+  display: none;
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: 50;
+  background: #fff;
+  border: 1.5px solid var(--gray-200);
+  border-radius: 0.75rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  list-style: none;
+  margin: 0;
+  padding: 0.375rem;
+  max-height: 15rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.place-ac-list--open {
+  display: block;
+}
+
+/* Individual suggestion row */
+.place-ac-item {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.625rem 0.75rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+  color: var(--gray-700);
+  transition: background-color 0.1s;
+  line-height: 1.4;
+}
+.place-ac-item:hover,
+.place-ac-item--on {
+  background-color: var(--blue-50);
+  color: var(--blue-700);
+}
+.place-ac-item-pin {
+  width: 0.875rem;
+  height: 0.875rem;
+  flex-shrink: 0;
+  color: var(--blue-400);
+}
+.place-ac-item--on .place-ac-item-pin {
+  color: var(--blue-600);
+}
+
+/* Empty / error message row */
+.place-ac-msg {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 0.75rem;
+  font-size: 0.8125rem;
+  color: var(--gray-400);
+  border-radius: 0.5rem;
+}
+.place-ac-msg--err {
+  color: #dc2626;
+}
+.place-ac-msg svg {
+  width: 0.875rem;
+  height: 0.875rem;
+  flex-shrink: 0;
+}
+
+/* =====================================================
+   LEAFLET MAP — custom markers & overrides
+   ===================================================== */
+
+/* Custom DivIcon circle marker */
+.map-marker {
+  /* Reset Leaflet's default white background */
+  background: none !important;
+  border: none !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-size: 11px;
+  font-weight: 700;
+  color: #fff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+.map-marker--a {
+  background-color: #2563eb !important;
+  outline: 2.5px solid #fff;
+}
+.map-marker--b {
+  background-color: #dc2626 !important;
+  outline: 2.5px solid #fff;
+}
+.map-marker span {
+  line-height: 1;
+}
+
+/* Soften the Leaflet attribution to match the design */
+.leaflet-control-attribution {
+  font-size: 0.625rem !important;
+  background: rgba(255, 255, 255, 0.75) !important;
+  backdrop-filter: blur(2px);
+}
+
+/* Ensure Leaflet tiles are clipped by the parent's border-radius */
+.bk-map-canvas .leaflet-container {
+  border-radius: inherit;
+}
+

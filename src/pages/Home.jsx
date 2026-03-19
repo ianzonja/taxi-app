@@ -1,209 +1,321 @@
 import { Link } from 'react-router-dom'
 import { Head } from 'vite-react-ssg'
 import {
-  MapPin, Star, Shield, Clock, Zap, Users, Car, ChevronRight, Quote
+  Star, ChevronRight, Quote,
+  Plane, Clock, Car, MapPin,
+  Dog, Baby, Package, Shield, Anchor,
 } from 'lucide-react'
 
-const features = [
-  { icon: Zap, title: 'Instant Booking', desc: 'Book a ride in seconds with our streamlined app — no waiting, no hassle.' },
-  { icon: Shield, title: 'Safe & Verified', desc: 'Every driver is background-checked and rated by thousands of riders.' },
-  { icon: Clock, title: '24/7 Available', desc: "Need a ride at 3am? We're always here — day, night, and everything between." },
-  { icon: MapPin, title: 'Live Tracking', desc: 'Track your driver in real time and share your trip with loved ones.' },
+/* ─── Data ─────────────────────────────────────────────────── */
+
+const benefits = [
+  {
+    icon: Dog,
+    title: 'Pet Friendly',
+    desc: 'Bring your beloved companions along — our drivers warmly welcome four-legged passengers.',
+  },
+  {
+    icon: Baby,
+    title: 'Baby Friendly',
+    desc: 'Child safety seats available on request for a safe, comfortable journey with your little ones.',
+  },
+  {
+    icon: Package,
+    title: 'Extra Luggage',
+    desc: 'Spacious vehicles with generous boot space for large bags, surfboards, and sports equipment.',
+  },
 ]
 
-const steps = [
-  { num: '01', title: 'Set Your Destination', desc: 'Enter your pickup and drop-off location.' },
-  { num: '02', title: 'Choose Your Ride', desc: 'Pick from Economy, Comfort, or Premium.' },
-  { num: '03', title: 'Confirm & Relax', desc: 'Your driver arrives in minutes. Sit back and enjoy.' },
+const services = [
+  {
+    icon: Car,
+    title: 'Private Transfers',
+    desc: 'Door-to-door private rides with no shared passengers, no detours — just you and Croatia\'s stunning scenery.',
+  },
+  {
+    icon: Plane,
+    title: 'Airport Pickups',
+    desc: 'Meet & greet service at Split, Dubrovnik and Zadar airports. We track your flight so you never wait.',
+  },
+  {
+    icon: MapPin,
+    title: 'Coastal Routes',
+    desc: 'Scenic rides along the entire Dalmatian coast — from Split to Dubrovnik, Hvar, Brač and everywhere between.',
+  },
+  {
+    icon: Clock,
+    title: '24 / 7 Availability',
+    desc: 'Early morning flight? Late-night arrival? We operate around the clock, every day of the year.',
+  },
 ]
 
 const testimonials = [
-  { name: 'Sarah M.', role: 'Daily Commuter', rating: 5, text: 'QuickRide has completely changed my morning commute. Always on time, clean cars, and friendly drivers!' },
-  { name: 'James R.', role: 'Business Traveler', rating: 5, text: 'I use QuickRide for all my airport transfers. The Premium tier is worth every penny — professional and punctual.' },
-  { name: 'Emily L.', role: 'Weekend Explorer', rating: 5, text: "Best taxi app I've used. The live tracking feature gives me so much peace of mind when traveling alone." },
+  {
+    name: 'Sarah M.',
+    role: 'Tourist from London',
+    rating: 5,
+    text: 'Absolutely perfect transfer from Split to Dubrovnik! The driver was professional, the car spotless, and the coastal views were breathtaking.',
+  },
+  {
+    name: 'James R.',
+    role: 'Business Traveler',
+    rating: 5,
+    text: 'Used them for airport pickups twice this summer. Always punctual, very professional. Makes business travel along the coast completely stress-free.',
+  },
+  {
+    name: 'Emily L.',
+    role: 'Family Vacationer',
+    rating: 5,
+    text: 'Traveled with two kids and all our luggage. The baby seat was ready, the driver was patient and kind. Could not have asked for more!',
+  },
 ]
 
 const stats = [
-  { value: '50K+', label: 'Happy Riders' },
-  { value: '1,200+', label: 'Verified Drivers' },
+  { value: '8+',   label: 'Years on the Coast' },
+  { value: '12K+', label: 'Happy Travelers' },
   { value: '4.9★', label: 'Average Rating' },
-  { value: '30+', label: 'Cities Covered' },
+  { value: '100+', label: 'Routes Covered' },
 ]
 
-const avatarColors = ['hero-avatar-blue', 'hero-avatar-indigo', 'hero-avatar-sky', 'hero-avatar-violet']
+/* Four iconic Dalmatian-coast images from Unsplash CDN */
+const scenicImages = [
+  {
+    src: 'https://images.unsplash.com/photo-1555993539-1732b0258235?auto=format&fit=crop&w=800&q=80',
+    alt: 'Split Old Town viewed from the sea',
+    caption: 'Split — Jewel of the Adriatic',
+  },
+  {
+    src: 'https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?auto=format&fit=crop&w=800&q=80',
+    alt: 'Scenic coastal road through Croatia',
+    caption: 'Drive through breathtaking coastal roads',
+  },
+  {
+    src: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80',
+    alt: 'Crystal-clear Adriatic waters',
+    caption: 'Crystal-clear Adriatic waters',
+  },
+  {
+    src: 'https://images.unsplash.com/photo-1544644181-1484b3fdfc62?auto=format&fit=crop&w=800&q=80',
+    alt: 'Sailing boat on the Dalmatian sea',
+    caption: 'Reach every island and hidden cove',
+  },
+]
+
+/* ─── Component ──────────────────────────────────────────────── */
 
 export default function Home() {
   return (
     <div>
       <Head>
-        <title>QuickRide — Fast, Safe &amp; Affordable Rides</title>
-        <meta name="description" content="Book a ride in seconds with QuickRide. Fast, safe, and affordable rides available 24/7 in 30+ cities. Instant booking, live tracking, and verified drivers." />
-        <meta property="og:title" content="QuickRide — Fast, Safe & Affordable Rides" />
-        <meta property="og:description" content="Book a ride in seconds with QuickRide. Fast, safe, and affordable rides available 24/7 in 30+ cities." />
+        <title>QuickRide — Private Transfers Along Croatia's Stunning Coastline</title>
+        <meta name="description" content="Premium private transfers along the Dalmatian coast. Pet friendly, baby friendly, extra luggage options. Airport pickups in Split, Dubrovnik and Zadar." />
+        <meta property="og:title" content="QuickRide — Private Transfers Along Croatia's Stunning Coastline" />
+        <meta property="og:description" content="Premium private transfers along the Dalmatian coast. Book your coastal journey today." />
         <meta property="og:type" content="website" />
       </Head>
-      {/* Hero */}
-      <section className="hero">
+
+      {/* ── HERO ─────────────────────────────────────────────── */}
+      {/*
+        Full-viewport hero with a real Adriatic coastline photo.
+        An <img> is used as the background so SSG can lazy-resolve it
+        and screen readers get a meaningful alt attribute.
+        The overlay gradient keeps white text readable at all viewport sizes.
+      */}
+      <section className="hero-coastal" aria-label="Hero">
+        <img
+          src="https://images.unsplash.com/photo-1599946347371-68eb71b16afc?auto=format&fit=crop&w=1920&q=80"
+          alt="Dubrovnik and the Dalmatian coastline"
+          className="hero-coastal-bg"
+        />
+        <div className="hero-coastal-overlay" aria-hidden="true" />
+
         <div className="container">
-          <div className="hero-grid">
-            <div className="hero-content">
-              <span className="badge badge-blue">
-                <Zap className="hero-badge-icon" /> Available in 30+ cities
-              </span>
-              <h1 className="hero-title">
-                Your Ride,<br />
-                <span className="hero-title-accent">Your Rules.</span>
-              </h1>
-              <p className="hero-subtitle">
-                Fast, safe, and affordable rides at your fingertips. Book in seconds and arrive in comfort — any time, anywhere.
-              </p>
-              <div className="hero-actions">
-                <Link to="/booking" className="btn btn-primary">
-                  Book a Ride <ChevronRight />
-                </Link>
-                <Link to="/about" className="btn btn-secondary">
-                  Learn More
-                </Link>
-              </div>
-              <div className="hero-social-proof">
-                <div className="hero-avatars">
-                  {avatarColors.map((c, i) => (
-                    <div key={i} className={`hero-avatar ${c}`}>
-                      <Users />
-                    </div>
-                  ))}
-                </div>
-                <p className="hero-proof-text">
-                  <span className="hero-proof-count">50,000+</span> happy riders this month
-                </p>
-              </div>
+          <div className="hero-coastal-content">
+            {/* Small trust badge */}
+            <span className="hero-coastal-badge">
+              <Star className="hero-coastal-badge-icon" aria-hidden="true" />
+              Rated 4.9 by 12,000+ Travelers
+            </span>
+
+            <h1 className="hero-coastal-title">
+              Private Transfers Along<br />
+              <span className="hero-coastal-title-accent">Croatia's Stunning Coastline</span>
+            </h1>
+
+            <p className="hero-coastal-subtitle">
+              Relax in comfort as we drive you through the most beautiful scenery in the Mediterranean.
+              Pet friendly · Baby friendly · Extra luggage options.
+            </p>
+
+            <div className="hero-coastal-actions">
+              <Link to="/booking" className="btn btn-coastal-primary">
+                Book a Ride <ChevronRight aria-hidden="true" />
+              </Link>
+              <Link to="/about" className="btn btn-coastal-ghost">
+                Learn More
+              </Link>
             </div>
 
-            {/* Hero visual */}
-            <div className="hero-visual">
-              <div className="hero-visual-card">
-                <Car />
+            {/* Three quick trust indicators below the CTA */}
+            <div className="hero-coastal-trust">
+              <div className="hero-coastal-trust-item">
+                <Shield className="hero-coastal-trust-icon" aria-hidden="true" />
+                <span>Licensed &amp; Insured</span>
               </div>
-              {/* Floating cards */}
-              <div className="hero-float-card hero-float-card-bottom">
-                <div className="hero-float-icon-wrapper hero-float-icon-wrapper-green">
-                  <MapPin className="hero-float-icon-green" />
-                </div>
-                <div>
-                  <p className="hero-float-label">Driver nearby</p>
-                  <p className="hero-float-value">2 min away</p>
-                </div>
+              <div className="hero-coastal-trust-item">
+                <Clock className="hero-coastal-trust-icon" aria-hidden="true" />
+                <span>24 / 7 Service</span>
               </div>
-              <div className="hero-float-card hero-float-card-top">
-                <div className="hero-float-icon-wrapper hero-float-icon-wrapper-yellow">
-                  <Star className="hero-float-icon-yellow" />
-                </div>
-                <div>
-                  <p className="hero-float-label">Top rated</p>
-                  <p className="hero-float-value">4.9 / 5.0</p>
-                </div>
+              <div className="hero-coastal-trust-item">
+                <Anchor className="hero-coastal-trust-icon" aria-hidden="true" />
+                <span>8+ Years Experience</span>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Stats */}
-      <section className="stats-section">
+      {/* ── STATS BAR ────────────────────────────────────────── */}
+      {/* Dark navy strip — creates contrast between the hero and benefits */}
+      <section className="coastal-stats" aria-label="Key statistics">
         <div className="container">
-          <div className="stats-grid">
+          <div className="coastal-stats-grid">
             {stats.map(({ value, label }) => (
-              <div key={label}>
-                <p className="stats-value">{value}</p>
-                <p className="stats-label">{label}</p>
+              <div key={label} className="coastal-stat-item">
+                <p className="coastal-stat-value">{value}</p>
+                <p className="coastal-stat-label">{label}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Features */}
-      <section className="features-section">
+      {/* ── BENEFITS ─────────────────────────────────────────── */}
+      {/*
+        Sand-toned section so it feels warm and distinct from the white body.
+        Three equal cards — stacked on mobile, three columns on desktop.
+      */}
+      <section className="benefits-section" aria-label="Our benefits">
         <div className="container">
           <div className="section-header">
-            <h2 className="section-title">Why Choose QuickRide?</h2>
-            <p className="section-subtitle">We go the extra mile so you don't have to. Here's what makes us different.</p>
+            <h2 className="section-title">We Thought of Everything</h2>
+            <p className="section-subtitle">Your comfort is our priority — for every passenger, every journey.</p>
           </div>
-          <div className="features-grid">
-            {features.map(({ icon: Icon, title, desc }) => (
-              <div key={title} className="feature-card">
-                <div className="feature-icon-wrapper">
-                  <Icon className="feature-icon" />
+          <div className="benefits-grid">
+            {benefits.map(({ icon: Icon, title, desc }) => (
+              <article key={title} className="benefit-card">
+                <div className="benefit-icon-wrapper" aria-hidden="true">
+                  <Icon className="benefit-icon" />
                 </div>
-                <h3 className="feature-title">{title}</h3>
-                <p className="feature-desc">{desc}</p>
+                <h3 className="benefit-title">{title}</h3>
+                <p className="benefit-desc">{desc}</p>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── SCENIC SHOWCASE ──────────────────────────────────── */}
+      {/*
+        Four-image grid celebrating the Dalmatian coastline.
+        Hover reveals a subtle scale and caption fade-in.
+        Images lazy-load since they are below the fold.
+      */}
+      <section className="scenic-section" aria-label="Dalmatian Coast showcase">
+        <div className="container">
+          <div className="section-header">
+            <h2 className="section-title">Travel in Comfort Along Croatia's Most Beautiful Routes</h2>
+            <p className="section-subtitle">
+              From the ancient walls of Dubrovnik to the lavender fields of Hvar — we know every road.
+            </p>
+          </div>
+          <div className="scenic-grid">
+            {scenicImages.map(({ src, alt, caption }) => (
+              <div key={alt} className="scenic-card">
+                <img src={src} alt={alt} className="scenic-card-img" loading="lazy" />
+                <div className="scenic-card-caption" aria-hidden="true">{caption}</div>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* How it works */}
-      <section className="how-section">
+      {/* ── SERVICES ─────────────────────────────────────────── */}
+      {/* Light gray background to separate from white scenic section */}
+      <section className="services-section" aria-label="Our services">
         <div className="container">
           <div className="section-header">
-            <h2 className="section-title">How It Works</h2>
-            <p className="section-subtitle">Three simple steps to your perfect ride.</p>
+            <h2 className="section-title">What We Offer</h2>
+            <p className="section-subtitle">Premium transportation tailored for the Dalmatian coast.</p>
           </div>
-          <div className="how-grid">
-            {steps.map(({ num, title, desc }, i) => (
-              <div key={num} className="how-step">
-                {i < steps.length - 1 && <div className="how-connector" />}
-                <div className="how-step-num">{num}</div>
-                <h3 className="how-step-title">{title}</h3>
-                <p className="how-step-desc">{desc}</p>
-              </div>
+          <div className="services-grid">
+            {services.map(({ icon: Icon, title, desc }) => (
+              <article key={title} className="service-card">
+                <div className="service-icon-wrapper" aria-hidden="true">
+                  <Icon className="service-icon" />
+                </div>
+                <div>
+                  <h3 className="service-title">{title}</h3>
+                  <p className="service-desc">{desc}</p>
+                </div>
+              </article>
             ))}
-          </div>
-          <div className="how-cta">
-            <Link to="/booking" className="btn btn-primary">
-              Book Your Ride Now <ChevronRight />
-            </Link>
           </div>
         </div>
       </section>
 
-      {/* Testimonials */}
-      <section className="testimonials-section">
+      {/* ── TESTIMONIALS ─────────────────────────────────────── */}
+      {/* Reuses existing testimonial CSS classes for consistency */}
+      <section className="testimonials-section coastal-testimonials" aria-label="Traveler reviews">
         <div className="container">
           <div className="section-header">
-            <h2 className="section-title">What Riders Say</h2>
-            <p className="section-subtitle">Real experiences from real people.</p>
+            <h2 className="section-title">What Travelers Say</h2>
+            <p className="section-subtitle">Real experiences from people who explored the Dalmatian coast with us.</p>
           </div>
           <div className="testimonials-grid">
             {testimonials.map(({ name, role, rating, text }) => (
-              <div key={name} className="testimonial-card">
-                <Quote className="testimonial-quote-icon" />
+              <article key={name} className="testimonial-card">
+                <Quote className="testimonial-quote-icon" aria-hidden="true" />
                 <p className="testimonial-text">{text}</p>
                 <div className="testimonial-footer">
                   <div>
                     <p className="testimonial-name">{name}</p>
                     <p className="testimonial-role">{role}</p>
                   </div>
-                  <div className="testimonial-stars">
+                  <div className="testimonial-stars" aria-label={`${rating} out of 5 stars`}>
                     {Array.from({ length: rating }).map((_, i) => (
-                      <Star key={i} className="testimonial-star" />
+                      <Star key={i} className="testimonial-star" aria-hidden="true" />
                     ))}
                   </div>
                 </div>
-              </div>
+              </article>
             ))}
           </div>
         </div>
       </section>
 
-      {/* CTA Banner */}
-      <section className="cta-section">
-        <h2 className="cta-title">Ready for Your Next Ride?</h2>
-        <p className="cta-subtitle">Join over 50,000 riders who trust QuickRide every day. Download the app or book online.</p>
-        <Link to="/booking" className="btn btn-white">
-          Get Started <ChevronRight />
-        </Link>
+      {/* ── CTA ──────────────────────────────────────────────── */}
+      {/*
+        Second full-width image section — a scenic coastal road at golden hour.
+        Same image-overlay pattern as the hero for visual consistency.
+      */}
+      <section className="coastal-cta-section" aria-label="Book your journey">
+        <img
+          src="https://images.unsplash.com/photo-1504681869696-d977211a5f4c?auto=format&fit=crop&w=1920&q=80"
+          alt="Scenic coastal road at golden hour"
+          className="coastal-cta-bg"
+          loading="lazy"
+        />
+        <div className="coastal-cta-overlay" aria-hidden="true" />
+        <div className="coastal-cta-content">
+          <h2 className="coastal-cta-title">Plan Your Coastal Journey Today</h2>
+          <p className="coastal-cta-subtitle">
+            Let us take the wheel while you take in the view. Book your private transfer in minutes.
+          </p>
+          <Link to="/booking" className="btn btn-coastal-primary">
+            Book a Ride <ChevronRight aria-hidden="true" />
+          </Link>
+        </div>
       </section>
     </div>
   )

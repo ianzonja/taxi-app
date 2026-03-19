@@ -1367,3 +1367,462 @@
 }
 .contact-form-submit:hover { background-color: var(--blue-700); }
 .contact-form-submit svg   { width: 1rem; height: 1rem; }
+
+/* =====================================================
+   HOME — COASTAL REDESIGN
+   All classes below are exclusively used by Home.jsx.
+   No existing classes are modified here.
+   ===================================================== */
+
+/* ── New design tokens (Mediterranean palette) ────────── */
+:root {
+  --coastal-900: #0f2b3d;   /* deep night navy          */
+  --coastal-800: #1a3f5c;   /* dark sea blue            */
+  --coastal-600: #1e5f8e;   /* medium ocean blue        */
+  --coastal-400: #4a9fd4;   /* light coastal blue       */
+  --sand-50:     #faf7f2;   /* warm off-white           */
+  --sand-100:    #f0e9d8;   /* light sand               */
+  --sand-200:    #ddd0b4;   /* medium sand              */
+  --amber-500:   #e09a3c;   /* warm gold — CTAs         */
+  --amber-600:   #c4821c;   /* deeper gold — hover      */
+}
+
+/* ── HERO ─────────────────────────────────────────────── */
+/*
+  Position: relative so the absolutely-placed <img> and overlay
+  sit behind the content without JavaScript.
+  min-height: 92vh fills the viewport below the sticky navbar.
+*/
+.hero-coastal {
+  position: relative;
+  min-height: 92vh;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+}
+
+/* The background <img> — covers the full section like object-fit: cover */
+.hero-coastal-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  /* No lazy loading on the hero — it is above the fold */
+}
+
+/* Semi-transparent gradient overlay for text readability */
+.hero-coastal-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to right,
+    rgba(15, 43, 61, 0.80) 0%,
+    rgba(15, 43, 61, 0.55) 60%,
+    rgba(15, 43, 61, 0.20) 100%
+  );
+}
+
+/* Content sits above both the image and overlay via z-index */
+.hero-coastal-content {
+  position: relative;
+  z-index: 1;
+  max-width: 42rem;
+  padding: 5rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Small pill badge at the top of the hero */
+.hero-coastal-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  background-color: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  padding: 0.375rem 0.875rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(4px);
+  width: fit-content;
+}
+.hero-coastal-badge-icon {
+  width: 0.875rem;
+  height: 0.875rem;
+  fill: var(--amber-500);
+  color: var(--amber-500);
+}
+
+/* Main headline */
+.hero-coastal-title {
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  font-weight: 700;
+  line-height: 1.15;
+  color: #fff;
+  letter-spacing: -0.02em;
+}
+.hero-coastal-title-accent {
+  color: var(--amber-500);
+}
+
+/* Subtitle paragraph */
+.hero-coastal-subtitle {
+  font-size: 1.125rem;
+  color: rgba(255, 255, 255, 0.85);
+  line-height: 1.7;
+  max-width: 32rem;
+}
+
+/* CTA row */
+.hero-coastal-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.875rem;
+  padding-top: 0.25rem;
+}
+
+/* Trust indicators row (icons + labels) */
+.hero-coastal-trust {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  padding-top: 0.5rem;
+}
+.hero-coastal-trust-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.80);
+  font-weight: 500;
+}
+.hero-coastal-trust-icon {
+  width: 1rem;
+  height: 1rem;
+  color: var(--amber-500);
+  flex-shrink: 0;
+}
+
+/* ── Buttons used on dark backgrounds ─────────────────── */
+/* Primary: amber/gold — visible against the dark overlay */
+.btn-coastal-primary {
+  background-color: var(--amber-500);
+  color: #fff;
+  padding: 0.875rem 1.875rem;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  box-shadow: 0 4px 14px rgba(224, 154, 60, 0.4);
+}
+.btn-coastal-primary:hover {
+  background-color: var(--amber-600);
+  box-shadow: 0 6px 20px rgba(224, 154, 60, 0.5);
+}
+
+/* Ghost: white outline — secondary action on dark backgrounds */
+.btn-coastal-ghost {
+  background-color: transparent;
+  color: #fff;
+  padding: 0.875rem 1.875rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border: 1.5px solid rgba(255, 255, 255, 0.6);
+  border-radius: 9999px;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: border-color 0.15s, background-color 0.15s;
+  cursor: pointer;
+  font-family: inherit;
+}
+.btn-coastal-ghost:hover {
+  border-color: #fff;
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* ── STATS BAR ────────────────────────────────────────── */
+.coastal-stats {
+  background-color: var(--coastal-900);
+  padding: 2.5rem 0;
+}
+.coastal-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+  text-align: center;
+  color: #fff;
+}
+@media (min-width: 640px) {
+  .coastal-stats-grid { grid-template-columns: repeat(4, 1fr); }
+}
+.coastal-stat-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--amber-500);
+  letter-spacing: -0.02em;
+}
+.coastal-stat-label {
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}
+
+/* ── BENEFITS ─────────────────────────────────────────── */
+/* Warm sand background — distinct from the white sections */
+.benefits-section {
+  background-color: var(--sand-50);
+  padding: 5rem 1rem;
+}
+.benefits-grid {
+  display: grid;
+  gap: 1.5rem;
+}
+@media (min-width: 640px) {
+  .benefits-grid { grid-template-columns: repeat(3, 1fr); }
+}
+
+/* Each benefit card */
+.benefit-card {
+  background-color: #fff;
+  border-radius: 1.25rem;
+  padding: 2rem 1.75rem;
+  text-align: center;
+  border: 1px solid var(--sand-200);
+  box-shadow: 0 2px 12px rgba(15, 43, 61, 0.06);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.benefit-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(15, 43, 61, 0.12);
+}
+
+/* Circular icon container */
+.benefit-icon-wrapper {
+  width: 3.5rem;
+  height: 3.5rem;
+  background-color: var(--coastal-800);
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.25rem;
+  transition: background-color 0.2s;
+}
+.benefit-card:hover .benefit-icon-wrapper {
+  background-color: var(--amber-500);
+}
+.benefit-icon {
+  width: 1.5rem;
+  height: 1.5rem;
+  color: #fff;
+}
+
+.benefit-title {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--coastal-900);
+  margin-bottom: 0.625rem;
+}
+.benefit-desc {
+  font-size: 0.9rem;
+  color: var(--gray-500);
+  line-height: 1.65;
+}
+
+/* ── SCENIC SHOWCASE ──────────────────────────────────── */
+.scenic-section {
+  background-color: #fff;
+  padding: 5rem 1rem;
+}
+/* 4-column grid on desktop; 2 on tablet; 1 on mobile */
+.scenic-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: 1fr;
+}
+@media (min-width: 640px) {
+  .scenic-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (min-width: 1024px) {
+  .scenic-grid { grid-template-columns: repeat(4, 1fr); }
+}
+
+/* Each image card with hover zoom + caption overlay */
+.scenic-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 1rem;
+  aspect-ratio: 3 / 4;          /* portrait for a scenic, editorial feel */
+  background-color: var(--sand-100);
+}
+@media (min-width: 640px) {
+  .scenic-card:first-child,
+  .scenic-card:last-child {
+    aspect-ratio: 3 / 4;
+  }
+}
+
+.scenic-card-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+  transition: transform 0.5s ease;
+}
+.scenic-card:hover .scenic-card-img {
+  transform: scale(1.06);
+}
+
+/* Caption fades in on hover via the gradient darkening */
+.scenic-card-caption {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 1.25rem 1rem 0.875rem;
+  background: linear-gradient(to top, rgba(15, 43, 61, 0.80), transparent);
+  color: #fff;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.scenic-card:hover .scenic-card-caption {
+  opacity: 1;
+}
+
+/* ── SERVICES ─────────────────────────────────────────── */
+.services-section {
+  background-color: var(--gray-50);
+  padding: 5rem 1rem;
+}
+/* 2-column grid on desktop */
+.services-grid {
+  display: grid;
+  gap: 1.25rem;
+}
+@media (min-width: 640px) {
+  .services-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+.service-card {
+  display: flex;
+  gap: 1.25rem;
+  align-items: flex-start;
+  padding: 1.5rem;
+  background-color: #fff;
+  border-radius: 1rem;
+  border: 1px solid var(--gray-100);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.service-card:hover {
+  border-color: var(--coastal-400);
+  box-shadow: 0 4px 16px rgba(15, 43, 61, 0.10);
+}
+
+.service-icon-wrapper {
+  flex-shrink: 0;
+  width: 3rem;
+  height: 3rem;
+  background-color: var(--coastal-800);
+  border-radius: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
+}
+.service-card:hover .service-icon-wrapper {
+  background-color: var(--amber-500);
+}
+.service-icon {
+  width: 1.375rem;
+  height: 1.375rem;
+  color: #fff;
+}
+
+.service-title {
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--coastal-900);
+  margin-bottom: 0.375rem;
+}
+.service-desc {
+  font-size: 0.875rem;
+  color: var(--gray-500);
+  line-height: 1.65;
+}
+
+/* ── TESTIMONIALS — coastal modifier ─────────────────── */
+/* Overrides the white background from .testimonials-section */
+.coastal-testimonials {
+  background-color: var(--sand-50);
+}
+
+/* ── COASTAL CTA SECTION ──────────────────────────────── */
+/* Full-width image section — mirrors the hero pattern */
+.coastal-cta-section {
+  position: relative;
+  padding: 7rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  overflow: hidden;
+  min-height: 24rem;
+}
+.coastal-cta-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+.coastal-cta-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(15, 43, 61, 0.70),
+    rgba(15, 43, 61, 0.80)
+  );
+}
+.coastal-cta-content {
+  position: relative;
+  z-index: 1;
+  max-width: 36rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+}
+.coastal-cta-title {
+  font-size: clamp(1.75rem, 4vw, 2.5rem);
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+.coastal-cta-subtitle {
+  color: rgba(255, 255, 255, 0.80);
+  font-size: 1.0625rem;
+  line-height: 1.65;
+  max-width: 28rem;
+}
+
+/* ── Responsive tweaks ────────────────────────────────── */
+@media (max-width: 639px) {
+  .hero-coastal-content { padding: 3.5rem 0; }
+  .hero-coastal-title   { font-size: 2rem; }
+  .hero-coastal-trust   { gap: 1rem; }
+  .benefit-card         { padding: 1.5rem; }
+  .coastal-cta-section  { padding: 5rem 1rem; }
+}

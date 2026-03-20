@@ -29,28 +29,41 @@ function fmtDur(s) {
 }
 
 async function viaORS(from, to, key, signal) {
-  const url = `https://api.openrouteservice.org/v2/directions/driving-car`
-    + `?api_key=${encodeURIComponent(key)}`
-    + `&start=${from.lon},${from.lat}`
-    + `&end=${to.lon},${to.lat}`
+  // POST to the /geojson endpoint — the plain GET endpoint returns an encoded
+  // polyline format (not GeoJSON), so we use the explicit geojson suffix here.
+  const res = await fetch(
+    'https://api.openrouteservice.org/v2/directions/driving-car/geojson',
+    {
+      method: 'POST',
+      headers: {
+        'Authorization':  key,
+        'Content-Type':   'application/json',
+        'Accept':         'application/json, application/geo+json',
+      },
+      body: JSON.stringify({
+        coordinates: [[from.lon, from.lat], [to.lon, to.lat]],
+      }),
+      signal,
+    },
+  )
 
-  const res = await fetch(url, { signal })
   if (!res.ok) {
     const body = await res.json().catch(() => ({}))
     throw new Error(body.error?.message ?? `ORS error (${res.status})`)
   }
+
   const data = await res.json()
   const feat = data.features?.[0]
   if (!feat) throw new Error('No route returned by ORS')
 
-  const coords              = feat.geometry.coordinates  // [lon, lat][]
+  const coords                 = feat.geometry.coordinates  // [lon, lat][]
   const { distance, duration } = feat.properties.summary
   return {
-    coordinates:    coords,
-    distanceMeters: distance,
+    coordinates:     coords,
+    distanceMeters:  distance,
     durationSeconds: duration,
-    distanceLabel:  fmtDist(distance),
-    durationLabel:  fmtDur(duration),
+    distanceLabel:   fmtDist(distance),
+    durationLabel:   fmtDur(duration),
   }
 }
 

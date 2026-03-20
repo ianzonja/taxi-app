@@ -323,7 +323,8 @@ export default function Booking() {
 
               {/* ── Map preview ────────────────────────────────────
                   BookingMap handles its own Leaflet loading state.
-                  Route overlays (loading, error, info) float above it.
+                  Route overlays (loading, error) float above the map.
+                  Route stats (distance / duration) appear below the map.
               ──────────────────────────────────────────────────── */}
               <div className="bk-map-wrap">
                 <BookingMap
@@ -347,22 +348,22 @@ export default function Booking() {
                     <span>{routeError}</span>
                   </div>
                 )}
-
-                {/* Route info bar — distance + duration */}
-                {routeInfo && !routeLoading && (
-                  <div className="bk-route-info" aria-label="Route summary">
-                    <div className="bk-route-info-item">
-                      <span className="bk-route-info-label">Distance</span>
-                      <span className="bk-route-info-val">{routeInfo.distance}</span>
-                    </div>
-                    <div className="bk-route-info-sep" aria-hidden="true" />
-                    <div className="bk-route-info-item">
-                      <span className="bk-route-info-label">Est. Drive</span>
-                      <span className="bk-route-info-val">{routeInfo.duration}</span>
-                    </div>
-                  </div>
-                )}
               </div>
+
+              {/* ── Route stats — shown below the map once a route is ready ── */}
+              {routeInfo && !routeLoading && (
+                <div className="bk-route-stats" aria-label="Route summary">
+                  <div className="bk-route-stats-item">
+                    <span className="bk-route-stats-label">Distance</span>
+                    <span className="bk-route-stats-val">{routeInfo.distance}</span>
+                  </div>
+                  <div className="bk-route-stats-sep" aria-hidden="true" />
+                  <div className="bk-route-stats-item">
+                    <span className="bk-route-stats-label">Est. Drive</span>
+                    <span className="bk-route-stats-val">{routeInfo.duration}</span>
+                  </div>
+                </div>
+              )}
             </section>
 
             {/* ─── Section B: Trip Details ─────────────────────── */}

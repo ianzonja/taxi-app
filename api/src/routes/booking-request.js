@@ -399,12 +399,15 @@ router.post('/', submitLimiter, async (req, res) => {
 
   // Send notification to driver
   const driverEmailAddress = process.env.DRIVER_EMAIL || 'mateospace93@gmail.com'
+  console.log('[email] Attempting to send to:', driverEmailAddress)
+  console.log('[email] SMTP config — host:', process.env.SMTP_HOST, 'port:', process.env.SMTP_PORT, 'user:', process.env.SMTP_USER)
   try {
     const emailContent = driverEmailTemplate({ ...booking, approvalLink })
     await sendEmail({ to: driverEmailAddress, ...emailContent })
+    console.log('[email] Sent successfully')
   } catch (err) {
-    // Log but don't fail the request — booking is saved regardless
-    console.error('[booking-request] Driver email failed:', err.message)
+    console.error('[email] FAILED:', err.message)
+    console.error('[email] Full error:', err)
   }
 
   console.log('[booking-request] Created', bookingId, { pickup: booking.pickup, destination: booking.destination, email: booking.customerEmail })

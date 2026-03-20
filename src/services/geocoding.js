@@ -5,8 +5,11 @@
  */
 
 const PHOTON_URL = 'https://photon.komoot.io/api'
-const BIAS_LAT   = 43.8   // center of Dalmatian coast
-const BIAS_LON   = 16.4
+const BIAS_LAT   = 43.5   // center of Dalmatian coast
+const BIAS_LON   = 16.2
+// Hard bbox for Croatia + immediate neighbours (lon_min,lat_min,lon_max,lat_max).
+// Keeps suggestions within the service area without excluding border crossings.
+const BBOX = '12.5,42.0,20.5,47.0'
 
 /**
  * @typedef {Object} PlaceResult
@@ -56,6 +59,7 @@ export async function searchPlaces(query, signal) {
   url.searchParams.set('limit', '6')
   url.searchParams.set('lat',   String(BIAS_LAT))
   url.searchParams.set('lon',   String(BIAS_LON))
+  url.searchParams.set('bbox',  BBOX)
 
   const res = await fetch(url.toString(), { signal })
   if (!res.ok) throw new Error(`Geocoding failed (${res.status})`)

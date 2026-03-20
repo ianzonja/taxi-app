@@ -2214,6 +2214,10 @@
   background-color: var(--gray-50);
   height: 280px;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  /* z-index: 0 creates a stacking context that contains all of Leaflet's
+     internal pane z-indexes (400–800), preventing them from escaping and
+     painting above the navbar (z-index: 50) or the autocomplete dropdown. */
+  z-index: 0;
 }
 @media (min-width: 640px)  { .bk-map-wrap { height: 340px; } }
 @media (min-width: 1024px) { .bk-map-wrap { height: 400px; } }
@@ -2693,7 +2697,8 @@
   top: calc(100% + 4px);
   left: 0;
   right: 0;
-  z-index: 50;
+  /* Must be above .bk-map-wrap (z-index: 0) but below .navbar (z-index: 50) */
+  z-index: 30;
   background: #fff;
   border: 1.5px solid var(--gray-200);
   border-radius: 0.75rem;
@@ -2796,5 +2801,49 @@
 /* Ensure Leaflet tiles are clipped by the parent's border-radius */
 .bk-map-canvas .leaflet-container {
   border-radius: inherit;
+}
+
+/* =====================================================
+   ROUTE STATS — displayed below the map
+   ===================================================== */
+.bk-route-stats {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 0.75rem;
+  padding: 0.875rem 1.25rem;
+  background: var(--blue-50);
+  border: 1px solid var(--blue-100);
+  border-radius: 0.75rem;
+  animation: fadeSlideIn 0.25s ease;
+}
+
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.bk-route-stats-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+.bk-route-stats-label {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--blue-500);
+}
+.bk-route-stats-val {
+  font-size: 1.0625rem;
+  font-weight: 700;
+  color: var(--blue-700);
+}
+.bk-route-stats-sep {
+  width: 1px;
+  height: 2rem;
+  background-color: var(--blue-200);
+  flex-shrink: 0;
 }
 

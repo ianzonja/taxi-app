@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Zadar Map</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f5f5f5;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    #filter-bar {
+      display: flex;
+      gap: 10px;
+      padding: 14px 20px;
+      background: #fff;
+      border-bottom: 1px solid #e8e8e8;
+      align-items: center;
+    }
+
+    #filter-bar span {
+      font-size: 13px;
+      font-weight: 600;
+      color: #888;
+      margin-right: 4px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .filter-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 14px;
+      border-radius: 20px;
+      border: 2px solid transparent;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      transition: all 0.15s ease;
+      background: #f0f0f0;
+      color: #555;
+    }
+
+    .filter-btn.active-beaches  { background: #fef3c7; border-color: #d4a017; color: #92600a; }
+    .filter-btn.active-restaurants { background: #fee2e2; border-color: #e05a2b; color: #9b2c2c; }
+    .filter-btn.active-bars     { background: #ede9fe; border-color: #7c3aed; color: #4c1d95; }
+
+    #map {
+      flex: 1;
+    }
+
+    .leaflet-popup-content-wrapper {
+      border-radius: 10px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+      border: none;
+      padding: 0;
+    }
+
+    .leaflet-popup-content {
+      margin: 14px 16px;
+    }
+
+    .popup-name {
+      font-size: 14px;
+      font-weight: 600;
+      color: #1a1a1a;
+      margin-bottom: 4px;
+    }
+
+    .popup-desc {
+      font-size: 12px;
+      color: #777;
+      line-height: 1.4;
+    }
+
+    .leaflet-popup-tip {
+      box-shadow: none;
+    }
+
+    .custom-pin {
+      width: 30px;
+      height: 30px;
+      border-radius: 50% 50% 50% 0;
+      transform: rotate(-45deg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+
+    .custom-pin span {
+      transform: rotate(45deg);
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="filter-bar">
+    <span>Show</span>
+    <button class="filter-btn active-beaches"  data-cat="beaches">🏖️ Beaches</button>
+    <button class="filter-btn active-restaurants" data-cat="restaurants">🍽️ Restaurants</button>
+    <button class="filter-btn active-bars"     data-cat="bars">🍹 Bars</button>
+  </div>
+
+  <div id="map"></div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+    const map = L.map('map', {
+      center: [44.1194, 15.2314],
+      zoom: 14,
+      zoomControl: true,
+    })
+
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+      attribution: '&copy; <a href="https://carto.com/">CARTO</a> &copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>',
+      subdomains: 'abcd',
+      maxZoom: 19,
+    }).addTo(map)
+
+    function makeIcon(emoji, bg) {
+      return L.divIcon({
+        className: '',
+        html: `<div style="
+          width:34px;height:34px;border-radius:50% 50% 50% 0;
+          background:${bg};transform:rotate(-45deg);
+          display:flex;align-items:center;justify-content:center;
+          box-shadow:0 2px 10px rgba(0,0,0,0.18);
+          border:2px solid rgba(255,255,255,0.8);
+        "><span style="transform:rotate(45deg);font-size:15px">${emoji}</span></div>`,
+        iconSize: [34, 34],
+        iconAnchor: [17, 34],
+        popupAnchor: [0, -36],
+      })
+    }
+
+    const icons = {
+      beaches:     makeIcon('🏖️', '#f6d860'),
+      restaurants: makeIcon('🍽️', '#f97316'),
+      bars:        makeIcon('🍹', '#8b5cf6'),
+    }
+
+    const data = {
+      beaches: [
+        { name: 'Kolovare Beach',        lat: 44.104763, lng: 15.234511, desc: 'Popular city beach close to the old town' },
+        { name: 'Borik Beach',           lat: 44.136197, lng: 15.209824, desc: 'Long pebbly beach with clear Adriatic water' },
+        { name: 'Puntamika Beach',       lat: 44.133221, lng: 15.203366, desc: 'Quiet neighbourhood beach, good for families' },
+        { name: 'Diklo Beach',           lat: 44.142715, lng: 15.211021, desc: 'Pebble beach with shallow, calm water' },
+      ],
+      restaurants: [
+        { name: 'Pet Bunara',            lat: 44.113030, lng: 15.229191, desc: 'Traditional Dalmatian cuisine in the old town' },
+        { name: 'Kornat',                lat: 44.118528, lng: 15.222868, desc: 'Upscale seafood on the harbour promenade' },
+        { name: 'Foša',                  lat: 44.111297, lng: 15.228005, desc: 'Romantic seafood restaurant in the old city moat' },
+        { name: 'Bruschetta',            lat: 44.113808, lng: 15.224985, desc: 'Cosy Italian-inspired spot popular with locals' },
+        { name: 'Konoba Stomorica',      lat: 44.113396, lng: 15.225466, desc: 'Rustic tavern with excellent grilled fish' },
+        { name: 'Trattoria Canzona',     lat: 44.113292, lng: 15.225652, desc: 'Charming family-run trattoria near the Forum' },
+      ],
+      bars: [
+        { name: 'The Garden Bar',        lat: 44.118095, lng: 15.223615, desc: 'Legendary open-air bar with sea views and live DJs' },
+        { name: 'Ledena Bar',            lat: 44.114454, lng: 15.223417, desc: 'Popular cocktail bar on the Riva promenade' },
+        { name: 'Café Bar Liburnija',    lat: 44.118528, lng: 15.222868, desc: 'Relaxed café-bar on the Liburnska obala waterfront' },
+        { name: 'Arsenal Zadar',         lat: 44.117521, lng: 15.224487, desc: 'Culture-bar hybrid in a converted Venetian arsenal' },
+        { name: 'Cave Bar More',         lat: 44.135362, lng: 15.210610, desc: 'Unique bar in Hotel More, Borik area' },
+      ],
+    }
+
+    const layers = { beaches: [], restaurants: [], bars: [] }
+    const active = { beaches: true, restaurants: true, bars: true }
+
+    for (const [cat, places] of Object.entries(data)) {
+      for (const p of places) {
+        const marker = L.marker([p.lat, p.lng], { icon: icons[cat] })
+          .bindPopup(`<div class="popup-name">${p.name}</div><div class="popup-desc">${p.desc}</div>`)
+          .addTo(map)
+        layers[cat].push(marker)
+      }
+    }
+
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const cat = btn.dataset.cat
+        active[cat] = !active[cat]
+
+        const cls = `active-${cat}`
+        btn.classList.toggle(cls, active[cat])
+        if (!active[cat]) btn.style.background = '#f0f0f0'
+
+        for (const marker of layers[cat]) {
+          if (active[cat]) marker.addTo(map)
+          else map.removeLayer(marker)
+        }
+      })
+    })
+  </script>
+</body>
+</html>

@@ -1,20 +1,33 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { Menu, X, Car } from 'lucide-react'
 
 const links = [
   { to: '/', label: 'Home' },
-  { to: '/booking', label: 'Book a Ride' },
+  { to: '/festivals', label: 'Festivals' },
+  { to: '/national-parks', label: 'National Parks' },
+  { to: '/day-trips', label: 'Day Trips' },
   { to: '/blog', label: 'Blog' },
   { to: '/about', label: 'About' },
 ]
 
 export default function Navbar() {
   const [open, setOpen] = useState(false)
+  const [scrolled, setScrolled] = useState(false)
   const { pathname } = useLocation()
 
+  useEffect(() => {
+    setScrolled(false)
+  }, [pathname])
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 20)
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
+
   return (
-    <nav className="navbar">
+    <nav className={`navbar${scrolled ? ' navbar--scrolled' : ''}`}>
       <div className="container">
         <div className="navbar-inner">
           {/* Logo */}
@@ -38,7 +51,7 @@ export default function Navbar() {
 
           {/* CTA */}
           <div className="navbar-cta-wrapper">
-            <Link to="/booking" className="navbar-cta">Book Now</Link>
+            <Link to="/booking" className="navbar-cta">Reserve My Ride</Link>
           </div>
 
           {/* Mobile burger */}
@@ -70,7 +83,7 @@ export default function Navbar() {
             onClick={() => setOpen(false)}
             className="navbar-mobile-cta"
           >
-            Book Now
+            Reserve My Ride
           </Link>
         </div>
       )}

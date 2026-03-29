@@ -40,9 +40,9 @@ export default function About() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form),
       })
+      const data = await res.json().catch(() => ({}))
       if (!res.ok) {
-        const { error: msg } = await res.json()
-        throw new Error(msg || 'Failed to send message')
+        throw new Error(data.error || 'Failed to send message')
       }
       setSent(true)
     } catch (err) {

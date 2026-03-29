@@ -1,0 +1,117 @@
+{
+  "QR-1774302653629-AA5D48": {
+    "bookingId": "QR-1774302653629-AA5D48",
+    "pickup": "Zadarska, Kaštela, Croatia",
+    "destination": "Split Airport, Cesta dr. Franje Tuđmana, 1270, Kaštel Štafilić, Croatia",
+    "date": "2026-10-10",
+    "time": "10:10",
+    "passengers": 1,
+    "extras": {
+      "luggage": false,
+      "babySeat": false,
+      "petCage": false,
+      "bikes": false
+    },
+    "customerEmail": "ianzonja@gmail.com",
+    "distanceKm": 4.6065,
+    "submittedAt": "2026-03-23T21:50:53.631Z",
+    "status": "approved",
+    "_approvalToken": "f89568dd0e1ee350c87b5bdee91b9e7d5f71f76598a57cc13e20619f52668c65",
+    "_tokenUsed": true,
+    "approvedAt": "2026-03-23T22:03:07.286Z",
+    "priceCents": 2500,
+    "priceFormatted": "€25.00",
+    "paymentLink": "http://localhost:5173/payment-success?booking=QR-1774302653629-AA5D48&demo=1"
+  },
+  "QR-1774302743243-42591D": {
+    "bookingId": "QR-1774302743243-42591D",
+    "pickup": "Split",
+    "destination": "Dubrovnik",
+    "date": "2026-04-01",
+    "time": "10:00",
+    "passengers": 2,
+    "extras": {
+      "luggage": false,
+      "babySeat": false,
+      "petCage": false,
+      "bikes": false
+    },
+    "customerEmail": "test@test.com",
+    "distanceKm": null,
+    "submittedAt": "2026-03-23T21:52:23.245Z",
+    "status": "pending",
+    "_approvalToken": "9b01fe0ad80ea90e9fcbcb82c1bf73d085698950d11ab7c77eee3010321fda07",
+    "_tokenUsed": false
+  },
+  "TEST-123": {
+    "foo": "bar"
+  },
+  "QR-1774302813901-F4D7B0": {
+    "bookingId": "QR-1774302813901-F4D7B0",
+    "pickup": "Split Airport",
+    "destination": "Dubrovnik Old Town",
+    "date": "2026-04-01",
+    "time": "10:00",
+    "passengers": 2,
+    "extras": {
+      "luggage": false,
+      "babySeat": false,
+      "petCage": false,
+      "bikes": false
+    },
+    "customerEmail": "test@test.com",
+    "distanceKm": 235.4,
+    "submittedAt": "2026-03-23T21:53:33.901Z",
+    "status": "pending",
+    "_approvalToken": "2db1be4744ee96e8faeab28451e5ba4535fe96bdb65ee8a358344a0b54a27fa1",
+    "_tokenUsed": false
+  },
+  "QR-1774302825686-EB782B": {
+    "bookingId": "QR-1774302825686-EB782B",
+    "pickup": "Split",
+    "destination": "Dubrovnik",
+    "date": "2026-04-01",
+    "time": "10:00",
+    "passengers": 1,
+    "extras": {
+      "luggage": false,
+      "babySeat": false,
+      "petCage": false,
+      "bikes": false
+    },
+    "customerEmail": "test@test.com",
+    "distanceKm": null,
+    "submittedAt": "2026-03-23T21:53:45.686Z",
+    "status": "approved",
+    "_approvalToken": "52f84d35b16a257ca4a391ac2106141dfd998a08b0b89c5f00a470850e9866c8",
+    "_tokenUsed": true,
+    "approvedAt": "2026-03-23T21:55:06.009Z",
+    "priceCents": 2500,
+    "priceFormatted": "€25.00",
+    "paymentLink": "http://localhost:5173/payment-success?booking=QR-1774302825686-EB782B&demo=1"
+  },
+  "QR-1774303627914-1351AC": {
+    "bookingId": "QR-1774303627914-1351AC",
+    "pickup": "Put Kaštela, Sveti Filip i Jakov, Croatia",
+    "destination": "Turanj, Sveti Filip i Jakov, Croatia",
+    "date": "2017-11-11",
+    "time": "11:11",
+    "passengers": 1,
+    "extras": {
+      "luggage": false,
+      "babySeat": false,
+      "petCage": true,
+      "bikes": false
+    },
+    "customerEmail": "gugagaga19@gmail.com",
+    "distanceKm": 0.1167,
+    "submittedAt": "2026-03-23T22:07:07.915Z",
+    "status": "approved",
+    "_approvalToken": "260b141771b3e15eb8301ba8f0f66afbd95db0a3a9aeb4612af95c4730b93195",
+    "_tokenUsed": true,
+    "approvedAt": "2026-03-23T22:07:33.127Z",
+    "priceCents": 2500,
+    "priceFormatted": "€25.00",
+    "paymentLink": "http://localhost:5173/payment-success?booking=QR-1774303627914-1351AC&demo=1"
+  }
+}

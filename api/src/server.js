@@ -8,7 +8,7 @@ import bookingRequestRouter from './routes/booking-request.js'
 
 const app = express()
 const PORT = process.env.PORT || 3001
-const ORIGIN = process.env.ALLOWED_ORIGIN || 'http://localhost:4173'
+const ORIGIN = process.env.ALLOWED_ORIGIN || 'http://localhost:5173'
 
 // Stripe webhook needs raw body — must be registered BEFORE express.json()
 app.post('/payment/webhook', express.raw({ type: 'application/json' }), webhookHandler)

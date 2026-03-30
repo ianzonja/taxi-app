@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { Head } from 'vite-react-ssg'
+import emailjs from '@emailjs/browser'
 import {
   MapPin, Navigation, Calendar, Clock, Users,
   Package, Baby, Dog, Bike, Mail,
@@ -8,9 +9,11 @@ import {
   Loader2, Info, ClipboardList, Search,
   UserCheck, CreditCard, Shield, Star, Zap, PhoneCall,
 } from 'lucide-react'
-import PlaceAutocomplete from '../components/PlaceAutocomplete'
-import BookingMap        from '../components/BookingMap'
-import { fetchRoute }    from '../services/routing'
+import PlaceAutocomplete  from '../components/PlaceAutocomplete'
+import BookingMap         from '../components/BookingMap'
+import DatePickerField    from '../components/DatePickerField'
+import TimePickerField    from '../components/TimePickerField'
+import { fetchRoute }     from '../services/routing'
 
 /* ─── Process steps ──────────────────────────────────────────── */
 const processSteps = [
@@ -42,7 +45,6 @@ const trustPoints = [
 export default function Booking() {
 
   const [searchParams] = useSearchParams()
-  const festivalName    = searchParams.get('festival') || ''
   const festivalDest    = searchParams.get('destination') || ''
 
   useEffect(() => { window.scrollTo(0, 0) }, [])
@@ -115,19 +117,39 @@ export default function Booking() {
     const errs = validate()
     setErrors(errs)
     if (Object.keys(errs).length) return
-    setStep('submitting'); setSubmitError(null)
+    setSubmitError(null)
+    setStep('submitting')
+
+    const extrasList = Object.entries(extras)
+      .filter(([, v]) => v)
+      .map(([k]) => ({ luggage: 'Extra Luggage', babySeat: 'Baby Seat', petCage: 'Pet Cage', bikes: 'Bike Transport' }[k]))
+      .join(', ') || 'None'
+
+    const bookingRef = `QR-${Date.now().toString(36).toUpperCase()}`
+
     try {
-      const res = await fetch('/api/booking-request', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ pickup, destination, date, time, passengers, extras, email, distanceKm }),
-      })
-      const data = await res.json().catch(() => ({}))
-      if (!res.ok) throw new Error(data.error || 'Failed to submit request')
-      setBookingId(data.bookingId)
+      await emailjs.send(
+        import.meta.env.VITE_EMAILJS_SERVICE_ID,
+        import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
+        {
+          booking_ref:    bookingRef,
+          pickup,
+          destination,
+          date,
+          time,
+          passengers:     String(passengers),
+          extras:         extrasList,
+          customer_email: email,
+          distance:       distanceKm ? `${distanceKm.toFixed(1)} km` : 'Not calculated',
+          reply_to:       email,
+        },
+        import.meta.env.VITE_EMAILJS_PUBLIC_KEY,
+      )
+      setBookingId(bookingRef)
       setStep('success')
     } catch (err) {
-      setSubmitError(err.message); setStep('form')
+      setStep('form')
+      setSubmitError(err?.text || err?.message || 'Something went wrong. Please try again or contact us directly.')
     }
   }
 
@@ -141,7 +163,6 @@ export default function Booking() {
     setStep('form')
   }
 
-  const today = typeof window !== 'undefined' ? new Date().toISOString().split('T')[0] : ''
 
   /* ═══════════════════════════════════════════════════════════
      SUCCESS STATE
@@ -204,7 +225,7 @@ export default function Booking() {
       </Head>
 
       {/* ── Hero ─────────────────────────────────────────────── */}
-      <header className="bk-hero">
+      <header className="bk-hero bk-hero--short">
         <div className="bk-hero-overlay" aria-hidden="true" />
         <div className="container bk-hero-content">
           <span className="bk-hero-kicker">Private Transfers · Dalmatian Coast</span>
@@ -212,189 +233,124 @@ export default function Booking() {
           <p className="bk-hero-subtitle">
             Airport pickups, festival transfers, and coastal day trips — door to door, no stress.
           </p>
-          {festivalName && (
-            <p className="bk-hero-festival-note">
-              Transferring to <strong>{festivalName}</strong> — destination pre-filled below.
-            </p>
-          )}
-          <a href="#bk-form" className="bk-hero-cta">
-            Check Availability <ChevronRight aria-hidden="true" />
-          </a>
-          <p className="bk-hero-fomo">
-            Festival dates fill up quickly — book early to secure your driver.
-          </p>
         </div>
       </header>
 
-      {/* ── How it works ──────────────────────────────────────── */}
-      <section className="bk-process-section" aria-label="Booking process">
+      {/* ── Unified booking card — floats over hero/white boundary ── */}
+      <main className="bk-main bk-main--elevated" id="bk-form">
         <div className="container">
-          <div className="bk-process-steps">
-            {processSteps.map(({ num, icon: Icon, title, desc }, i) => (
-              <div key={num} className="bk-process-step">
-                <div className="bk-process-icon-wrap" aria-hidden="true">
-                  <Icon className="bk-process-icon" />
-                  <span className="bk-process-num">{num}</span>
-                </div>
-                <div className="bk-process-text">
-                  <h3 className="bk-process-title">{title}</h3>
-                  <p  className="bk-process-desc">{desc}</p>
-                </div>
-                {i < processSteps.length - 1 && (
-                  <ChevronRight className="bk-process-arrow" aria-hidden="true" />
-                )}
+          <form onSubmit={handleSubmit} className="bk-unified-card" noValidate>
+
+            {/* ── Row 1: Pickup + Destination ──────────────────── */}
+            <div className="bk-card-route">
+
+              <div className="bk-field">
+                <label htmlFor="pickup" className="bk-label">
+                  <MapPin className="bk-label-icon" aria-hidden="true" />
+                  Pickup Location
+                </label>
+                <PlaceAutocomplete
+                  id="pickup"
+                  value={pickup}
+                  onChange={text => { setPickup(text); if (pickupPlace) setPickupPlace(null) }}
+                  onSelect={place => {
+                    if (place) {
+                      setPickupPlace(place); setPickup(place.label)
+                      setErrors(prev => ({ ...prev, pickup: undefined }))
+                    }
+                  }}
+                  placeholder="e.g. Split Airport (SPU)"
+                  hasError={!!errors.pickup}
+                  aria-describedby={errors.pickup ? 'err-pickup' : undefined}
+                />
+                {errors.pickup && <p id="err-pickup" className="bk-field-err" role="alert">{errors.pickup}</p>}
               </div>
-            ))}
-          </div>
-        </div>
-      </section>
 
-      {/* ── Main form ─────────────────────────────────────────── */}
-      <main className="bk-main" id="bk-form">
-        <div className="container">
-          <form onSubmit={handleSubmit} className="bk-form" noValidate>
 
-            {/* ── Two-column layout ──────────────────────────── */}
-            <div className="bk-layout">
+              <div className="bk-field">
+                <label htmlFor="destination" className="bk-label">
+                  <Navigation className="bk-label-icon" aria-hidden="true" />
+                  Destination
+                </label>
+                <PlaceAutocomplete
+                  id="destination"
+                  value={destination}
+                  onChange={text => { setDestination(text); if (destPlace) setDestPlace(null) }}
+                  onSelect={place => {
+                    if (place) {
+                      setDestPlace(place); setDestination(place.label)
+                      setErrors(prev => ({ ...prev, destination: undefined }))
+                    }
+                  }}
+                  placeholder="e.g. Dubrovnik Old Town"
+                  hasError={!!errors.destination}
+                  aria-describedby={errors.destination ? 'err-dest' : undefined}
+                />
+                {errors.destination && <p id="err-dest" className="bk-field-err" role="alert">{errors.destination}</p>}
+              </div>
 
-              {/* ── Left: form fields ─────────────────────── */}
-              <div className="bk-layout-fields">
+            </div>{/* /bk-card-route */}
 
-                {/* Section A: Route ─────────────────────── */}
-                <section className="bk-section" aria-labelledby="sec-route">
-                  <div className="bk-section-hd">
-                    <div className="bk-section-icon-ring" aria-hidden="true">
-                      <MapPin className="bk-section-icon" />
-                    </div>
-                    <div>
-                      <h2 className="bk-section-title" id="sec-route">Your Route</h2>
-                      <p  className="bk-section-sub">Where are you traveling from and to?</p>
+            <hr className="bk-card-divider" />
+
+            {/* ── Rows 2-5: 2-column body (map starts here) ────── */}
+            <div className="bk-card-body">
+
+              {/* ── Left column ─────────────────────────────── */}
+              <div className="bk-card-left">
+
+                {/* Row 2: Date + Time + Passengers */}
+                <div className="bk-card-datetime">
+                  <div className="bk-field bk-field--date">
+                    <label htmlFor="date" className="bk-label">
+                      <Calendar className="bk-label-icon" aria-hidden="true" />Date
+                    </label>
+                    <DatePickerField
+                      id="date"
+                      value={date}
+                      onChange={val => { setDate(val); setErrors(prev => ({ ...prev, date: undefined })) }}
+                      hasError={!!errors.date}
+                      placeholder="Select date"
+                    />
+                    {errors.date && <p id="err-date" className="bk-field-err" role="alert">{errors.date}</p>}
+                  </div>
+                  <div className="bk-field bk-field--time">
+                    <label htmlFor="time" className="bk-label">
+                      <Clock className="bk-label-icon" aria-hidden="true" />Time
+                    </label>
+                    <TimePickerField
+                      id="time"
+                      value={time}
+                      onChange={val => { setTime(val); setErrors(prev => ({ ...prev, time: undefined })) }}
+                      hasError={!!errors.time}
+                      placeholder="Select time"
+                    />
+                    {errors.time && <p id="err-time" className="bk-field-err" role="alert">{errors.time}</p>}
+                  </div>
+                  <div className="bk-field bk-field--pax">
+                    <label className="bk-label" id="pax-label">
+                      <Users className="bk-label-icon" aria-hidden="true" />Passengers
+                    </label>
+                    <div className="bk-pax-ctrl" aria-labelledby="pax-label">
+                      <button type="button" className="bk-pax-btn"
+                        onClick={() => setPassengers(p => Math.max(1, p - 1))}
+                        aria-label="Decrease passengers" disabled={passengers <= 1}>−</button>
+                      <span className="bk-pax-val" aria-live="polite">{passengers}</span>
+                      <button type="button" className="bk-pax-btn"
+                        onClick={() => setPassengers(p => Math.min(8, p + 1))}
+                        aria-label="Increase passengers" disabled={passengers >= 8}>+</button>
                     </div>
                   </div>
+                </div>
 
-                  <div className="bk-route-stack">
-                    {/* Pickup */}
-                    <div className="bk-field">
-                      <label htmlFor="pickup" className="bk-label">
-                        <MapPin className="bk-label-icon" aria-hidden="true" />
-                        Pickup Location
-                        <span className="bk-label-hint">· type and select from the list</span>
-                      </label>
-                      <PlaceAutocomplete
-                        id="pickup"
-                        value={pickup}
-                        onChange={text => { setPickup(text); if (pickupPlace) setPickupPlace(null) }}
-                        onSelect={place => {
-                          if (place) {
-                            setPickupPlace(place); setPickup(place.label)
-                            setErrors(prev => ({ ...prev, pickup: undefined }))
-                          }
-                        }}
-                        placeholder="e.g. Split Airport (SPU)"
-                        hasError={!!errors.pickup}
-                        aria-describedby={errors.pickup ? 'err-pickup' : undefined}
-                      />
-                      {errors.pickup && <p id="err-pickup" className="bk-field-err" role="alert">{errors.pickup}</p>}
-                    </div>
-
-                    {/* Connector */}
-                    <div className="bk-route-connector" aria-hidden="true">
-                      <div className="bk-route-line" />
-                      <Navigation className="bk-route-nav-icon" />
-                      <div className="bk-route-line" />
-                    </div>
-
-                    {/* Destination */}
-                    <div className="bk-field">
-                      <label htmlFor="destination" className="bk-label">
-                        <Navigation className="bk-label-icon" aria-hidden="true" />
-                        Destination
-                        <span className="bk-label-hint">· type and select from the list</span>
-                      </label>
-                      <PlaceAutocomplete
-                        id="destination"
-                        value={destination}
-                        onChange={text => { setDestination(text); if (destPlace) setDestPlace(null) }}
-                        onSelect={place => {
-                          if (place) {
-                            setDestPlace(place); setDestination(place.label)
-                            setErrors(prev => ({ ...prev, destination: undefined }))
-                          }
-                        }}
-                        placeholder="e.g. Dubrovnik Old Town"
-                        hasError={!!errors.destination}
-                        aria-describedby={errors.destination ? 'err-dest' : undefined}
-                      />
-                      {errors.destination && <p id="err-dest" className="bk-field-err" role="alert">{errors.destination}</p>}
-                    </div>
-                  </div>
-                </section>
-
-                {/* Section B: Trip Details ───────────────── */}
-                <section className="bk-section" aria-labelledby="sec-trip">
-                  <div className="bk-section-hd">
-                    <div className="bk-section-icon-ring" aria-hidden="true">
-                      <Calendar className="bk-section-icon" />
-                    </div>
-                    <div>
-                      <h2 className="bk-section-title" id="sec-trip">Trip Details</h2>
-                      <p  className="bk-section-sub">When are you traveling and how many passengers?</p>
-                    </div>
-                  </div>
-                  <div className="bk-fields-row">
-                    <div className="bk-field">
-                      <label htmlFor="date" className="bk-label">
-                        <Calendar className="bk-label-icon" aria-hidden="true" />Date
-                      </label>
-                      <input
-                        id="date" type="date" value={date} min={today}
-                        onChange={e => setDate(e.target.value)}
-                        className={`bk-input${errors.date ? ' bk-input--err' : ''}`}
-                        aria-describedby={errors.date ? 'err-date' : undefined}
-                      />
-                      {errors.date && <p id="err-date" className="bk-field-err" role="alert">{errors.date}</p>}
-                    </div>
-                    <div className="bk-field">
-                      <label htmlFor="time" className="bk-label">
-                        <Clock className="bk-label-icon" aria-hidden="true" />Time
-                      </label>
-                      <input
-                        id="time" type="time" value={time}
-                        onChange={e => setTime(e.target.value)}
-                        className={`bk-input${errors.time ? ' bk-input--err' : ''}`}
-                        aria-describedby={errors.time ? 'err-time' : undefined}
-                      />
-                      {errors.time && <p id="err-time" className="bk-field-err" role="alert">{errors.time}</p>}
-                    </div>
-                    <div className="bk-field">
-                      <label className="bk-label" id="pax-label">
-                        <Users className="bk-label-icon" aria-hidden="true" />Passengers
-                      </label>
-                      <div className="bk-pax-ctrl" aria-labelledby="pax-label">
-                        <button type="button" className="bk-pax-btn"
-                          onClick={() => setPassengers(p => Math.max(1, p - 1))}
-                          aria-label="Decrease" disabled={passengers <= 1}>−</button>
-                        <span className="bk-pax-val" aria-live="polite">{passengers}</span>
-                        <button type="button" className="bk-pax-btn"
-                          onClick={() => setPassengers(p => Math.min(8, p + 1))}
-                          aria-label="Increase" disabled={passengers >= 8}>+</button>
-                      </div>
-                    </div>
-                  </div>
-                </section>
-
-                {/* Section C: Extras ─────────────────────── */}
-                <section className="bk-section" aria-labelledby="sec-extras">
-                  <div className="bk-section-hd">
-                    <div className="bk-section-icon-ring" aria-hidden="true">
-                      <Package className="bk-section-icon" />
-                    </div>
-                    <div>
-                      <h2 className="bk-section-title" id="sec-extras">Extras</h2>
-                      <p  className="bk-section-sub">Any special requirements for your transfer?</p>
-                    </div>
-                  </div>
-                  <div className="bk-extras-chips" role="group" aria-labelledby="sec-extras">
+                {/* Row 3: Extras */}
+                <div className="bk-card-section">
+                  <p className="bk-card-section-label">
+                    <Package className="bk-label-icon" aria-hidden="true" />
+                    Extras
+                    <span className="bk-label-hint">· any special requirements?</span>
+                  </p>
+                  <div className="bk-extras-chips" role="group" aria-label="Extras">
                     {EXTRAS.map(({ key, icon: Icon, label }) => (
                       <button
                         key={key} type="button"
@@ -408,20 +364,11 @@ export default function Booking() {
                       </button>
                     ))}
                   </div>
-                </section>
+                </div>
 
-                {/* Section D: Contact ────────────────────── */}
-                <section className="bk-section" aria-labelledby="sec-contact">
-                  <div className="bk-section-hd">
-                    <div className="bk-section-icon-ring" aria-hidden="true">
-                      <Mail className="bk-section-icon" />
-                    </div>
-                    <div>
-                      <h2 className="bk-section-title" id="sec-contact">Your Contact</h2>
-                      <p  className="bk-section-sub">We'll send your confirmation and invoice here.</p>
-                    </div>
-                  </div>
-                  <div className="bk-field bk-field--narrow">
+                {/* Row 4: Email */}
+                <div className="bk-card-section">
+                  <div className="bk-field">
                     <label htmlFor="email" className="bk-label">
                       <Mail className="bk-label-icon" aria-hidden="true" />Email Address
                     </label>
@@ -434,16 +381,16 @@ export default function Booking() {
                     />
                     {errors.email && <p id="err-email" className="bk-field-err" role="alert">{errors.email}</p>}
                   </div>
-                </section>
+                </div>
 
-              </div>{/* /bk-layout-fields */}
+              </div>{/* /bk-card-left */}
 
-              {/* ── Right: sticky map + trust ──────────── */}
-              <aside className="bk-layout-map">
+              {/* ── Right column: Map ────────────────────────── */}
+              <div className="bk-card-right">
 
-                {/* Map card */}
-                <div className="bk-side-card">
-                  <div className="bk-map-wrap bk-map-wrap--side">
+                {/* Map panel */}
+                <div className="bk-map-panel">
+                  <div className="bk-map-wrap bk-map-wrap--card">
                     <BookingMap
                       pickupPlace={pickupPlace}
                       destPlace={destPlace}
@@ -463,7 +410,6 @@ export default function Booking() {
                     )}
                   </div>
 
-                  {/* Route stats below map */}
                   {routeInfo && !routeLoading ? (
                     <div className="bk-side-stats" aria-label="Route summary">
                       <div className="bk-side-stat">
@@ -494,8 +440,25 @@ export default function Booking() {
                   )}
                 </div>
 
-                {/* Trust points */}
-                <div className="bk-side-trust" aria-label="Why choose us">
+              </div>{/* /bk-card-right */}
+
+              {/* ── Submit + trust (desktop only) ───────────────────── */}
+              <div className="bk-card-submit">
+                {submitError && (
+                  <div className="bk-submit-error" role="alert">
+                    <AlertCircle aria-hidden="true" />
+                    <span>{submitError}</span>
+                  </div>
+                )}
+                <button type="submit" className="bk-submit-btn bk-submit-btn--inline" disabled={step === 'submitting'}>
+                  {step === 'submitting' ? (
+                    <><Loader2 className="spinning" aria-hidden="true" />Submitting…</>
+                  ) : (
+                    <>Reserve My Ride <ChevronRight aria-hidden="true" /></>
+                  )}
+                </button>
+                {/* Trust items: visible only on desktop, mobile uses bk-trust-below outside */}
+                <div className="bk-trust-grid bk-trust-grid--inline" aria-label="Why choose us">
                   {trustPoints.map(({ icon: Icon, text }) => (
                     <div key={text} className="bk-side-trust-item">
                       <Icon className="bk-side-trust-icon" aria-hidden="true" />
@@ -503,49 +466,52 @@ export default function Booking() {
                     </div>
                   ))}
                 </div>
-
-              </aside>
-
-            </div>{/* /bk-layout */}
-
-            {/* ── Submit panel — full width ──────────────── */}
-            <div className="bk-submit-panel">
-              <div className="bk-submit-notice">
-                <Info className="bk-submit-notice-icon" aria-hidden="true" />
-                <div>
-                  <strong>This is a reservation request — no payment is taken now.</strong>
-                  <p>
-                    After we review and approve your transfer, you will receive an invoice
-                    and a secure payment link at the email address above.
-                  </p>
-                </div>
               </div>
-              {submitError && (
-                <div className="bk-submit-err" role="alert">
-                  <AlertCircle aria-hidden="true" /><span>{submitError}</span>
-                </div>
-              )}
-              <p className="bk-submit-fomo">
-                Festival dates fill up quickly — book early to secure your spot.
-              </p>
-              <button type="submit" className="bk-submit-btn" disabled={step === 'submitting'}>
-                {step === 'submitting' ? (
-                  <><Loader2 className="spinning" aria-hidden="true" />Submitting Request…</>
-                ) : (
-                  <>Reserve My Ride <ChevronRight aria-hidden="true" /></>
-                )}
-              </button>
-              <p className="bk-submit-nopay">
-                No payment required now — we confirm your ride first.
-              </p>
-              <p className="bk-submit-footer">
-                By submitting you agree to our terms. Your information is handled securely and never shared.
-              </p>
-            </div>
+
+            </div>{/* /bk-card-body */}
 
           </form>
         </div>
       </main>
+
+      {/* ── Trust points — below card, 2×2 grid ──────────────── */}
+      <div className="bk-trust-below">
+        <div className="container">
+          <div className="bk-trust-grid" aria-label="Why choose us">
+            {trustPoints.map(({ icon: Icon, text }) => (
+              <div key={text} className="bk-side-trust-item">
+                <Icon className="bk-side-trust-icon" aria-hidden="true" />
+                <span>{text}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* ── How it works — below the booking card ────────────── */}
+      <section className="bk-process-section" aria-label="Booking process">
+        <div className="container">
+          <h2 className="bk-process-heading">How It Works</h2>
+          <div className="bk-process-steps">
+            {processSteps.map(({ num, icon: Icon, title, desc }, i) => (
+              <div key={num} className="bk-process-step">
+                <div className="bk-process-icon-wrap" aria-hidden="true">
+                  <Icon className="bk-process-icon" />
+                  <span className="bk-process-num">{num}</span>
+                </div>
+                <div className="bk-process-text">
+                  <h3 className="bk-process-title">{title}</h3>
+                  <p  className="bk-process-desc">{desc}</p>
+                </div>
+                {i < processSteps.length - 1 && (
+                  <ChevronRight className="bk-process-arrow" aria-hidden="true" />
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
     </div>
   )
 }

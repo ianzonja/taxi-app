@@ -583,32 +583,10 @@ export default function Festivals() {
         </div>
         <div className="fv-hero-overlay" />
 
-        <div className="fv-hero-content">
-          <span className="fv-hero-badge">
-            <Music size={13} /> 22 Festivals · Summer 2026 · Dalmatia, Croatia
-          </span>
-          <h1 className="fv-hero-title">
-            Your Summer of Music<br />
-            <em>Starts Here</em>
-          </h1>
-          <p className="fv-hero-sub">
+        <div className="fv-hero-content fv-hero-content--centered">
+          <p className="fv-hero-tagline">
             The best festivals in Europe — and we'll get you there safely, on time, every time.
           </p>
-          <button className="fv-hero-cta" onClick={() => scrollTo('festivals')}>
-            Browse Festivals <ArrowRight size={20} />
-          </button>
-
-          <div className="fv-hero-trust">
-            {[
-              { icon: Shield, text: 'Safe & insured' },
-              { icon: Clock,  text: 'Always on time' },
-              { icon: MapPin, text: 'Local drivers' },
-            ].map(({ icon: Icon, text }) => (
-              <span key={text} className="fv-trust-badge">
-                <Icon size={13} /> {text}
-              </span>
-            ))}
-          </div>
         </div>
 
         <div className="fv-hero-stats">
@@ -632,22 +610,6 @@ export default function Festivals() {
         ))}
       </div>
 
-      {/* ── STICKY SECTION NAV ─────────────────────────────────────────────── */}
-      <nav className="fv-section-nav">
-        <div className="fv-section-nav-inner">
-          {[
-            { id: 'festivals', label: 'Festivals' },
-            { id: 'packages',  label: 'Packages' },
-            { id: 'why-us',    label: 'Why Us' },
-            { id: 'faq',       label: 'FAQ' },
-          ].map(({ id, label }) => (
-            <button key={id} className="fv-snav-link" onClick={() => scrollTo(id)}>
-              {label}
-            </button>
-          ))}
-          <Link to="/booking" className="fv-snav-cta">Book Now</Link>
-        </div>
-      </nav>
 
       {/* ── FESTIVAL CARDS ─────────────────────────────────────────────────── */}
       <section className="fv-festivals-section" id="festivals">

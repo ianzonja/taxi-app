@@ -3,49 +3,46 @@
  *
  * Handles the manual-approval transfer booking flow:
  *
- *   POST /booking-request            — create pending request, email driver
- *   GET  /booking-request/:id/approve?token=… — approve (browser link in email)
- *   POST /booking-request/:id/approve?token=… — approve (programmatic)
- *   POST /booking-request/:id/reject?token=…  — reject
- *   GET  /booking-request/:id?token=…         — view booking details
+ *   POST /booking-request                      — create pending request, email driver
+ *   GET  /booking-request/:id/approve?token=…  — approve (browser link in driver email)
+ *   POST /booking-request/:id/approve?token=…  — approve (programmatic)
+ *   POST /booking-request/:id/reject?token=…   — reject
+ *   GET  /booking-request/:id?token=…          — view booking details
+ *
+ * On approval the handler:
+ *   1. Calculates price (€5/km via pricing.js)
+ *   2. Creates a Stripe Checkout Session
+ *   3. Emails the customer the real Stripe payment URL
  *
  * Security: approval is gated by an HMAC-SHA256 token derived from the
  * bookingId and a server-side secret (APPROVAL_TOKEN_SECRET env var).
- * A one-time token burned on first use prevents replay.
+ * The token is burned on first use to prevent replay attacks.
  */
 
-import { Router } from 'express'
+import { Router }   from 'express'
 import { createHmac, randomBytes } from 'crypto'
-import rateLimit from 'express-rate-limit'
+import rateLimit    from 'express-rate-limit'
+import Stripe       from 'stripe'
+import { sendEmail }             from '../lib/mailer.js'
+import { getBooking, setBooking } from '../lib/store.js'
+import { calculatePriceCents, formatEuro } from '../lib/pricing.js'
 
 const router = Router()
 
 /* ── Rate limiting ───────────────────────────────────────────── */
 const submitLimiter = rateLimit({ windowMs: 60_000, max: 10, standardHeaders: true })
 
-/* ── In-memory store ─────────────────────────────────────────── */
-// TODO: replace with a real database (PostgreSQL, SQLite, etc.) in production.
-// The Map is keyed by bookingId and holds the full booking object.
-const bookingStore = new Map()
-
 /* ── Token helpers ───────────────────────────────────────────── */
 
-/**
- * Generate a deterministic HMAC-SHA256 approval token.
- * The token is derived from the bookingId + a server secret so it cannot be
- * forged without knowing the secret, and it is unique per booking.
- */
 function makeApprovalToken(bookingId) {
   const secret = process.env.APPROVAL_TOKEN_SECRET || 'dev-secret-CHANGE-IN-PRODUCTION'
   return createHmac('sha256', secret).update(bookingId).digest('hex')
 }
 
-/** Constant-time comparison prevents timing attacks. */
 function verifyApprovalToken(bookingId, candidateToken) {
   if (!candidateToken) return false
   const expected = makeApprovalToken(bookingId)
   if (expected.length !== candidateToken.length) return false
-  // Simple character comparison is fine here because hex strings are fixed length
   let diff = 0
   for (let i = 0; i < expected.length; i++) {
     diff |= expected.charCodeAt(i) ^ candidateToken.charCodeAt(i)
@@ -62,14 +59,11 @@ function newBookingId() {
    EMAIL TEMPLATES
    ═══════════════════════════════════════════════════════════════ */
 
-/**
- * Email sent to the driver / company when a new request is submitted.
- * Contains all booking details + a one-click approval link.
- */
 function driverEmailTemplate({ bookingId, pickup, destination, date, time,
-  passengers, extras, customerEmail, submittedAt, approvalLink }) {
+  passengers, extras, customerEmail, submittedAt, approvalLink, distanceKm }) {
   const { luggage, babySeat, petCage, bikes } = extras
   const yn = v => v ? 'Yes' : 'No'
+  const distanceStr = distanceKm ? `${distanceKm.toFixed(1)} km` : 'Unknown'
 
   const subject = `New Booking Request – ${pickup} to ${destination} on ${date}`
 
@@ -85,6 +79,7 @@ Destination:   ${destination}
 Date:          ${date}
 Time:          ${time}
 Passengers:    ${passengers}
+Distance:      ${distanceStr}
 
 EXTRAS
 ──────
@@ -153,6 +148,7 @@ QuickRide Booking System`
     <div class="row"><span class="lbl">Date</span><span class="val">${date}</span></div>
     <div class="row"><span class="lbl">Time</span><span class="val">${time}</span></div>
     <div class="row"><span class="lbl">Passengers</span><span class="val">${passengers}</span></div>
+    <div class="row"><span class="lbl">Distance</span><span class="val">${distanceStr}</span></div>
 
     <p class="label">Extras</p>
     <div class="extras">
@@ -178,12 +174,8 @@ QuickRide Booking System`
   return { subject, text, html }
 }
 
-/**
- * Email sent to the customer after the driver approves the request.
- * Contains a summary and a payment link.
- */
 function customerApprovalEmailTemplate({ bookingId, pickup, destination, date, time,
-  passengers, extras, paymentLink, companyName }) {
+  passengers, extras, paymentLink, companyName, priceFormatted }) {
   const { luggage, babySeat, petCage, bikes } = extras
   const yn = v => v ? 'Yes' : 'No'
 
@@ -200,6 +192,7 @@ Destination:   ${destination}
 Date:          ${date}
 Time:          ${time}
 Passengers:    ${passengers}
+Total Price:   ${priceFormatted}
 
 SELECTED EXTRAS
 ───────────────
@@ -242,6 +235,7 @@ ${companyName}`
        padding:9px 0;border-bottom:1px solid #f1f5f9;font-size:14px;gap:12px}
   .row:last-child{border-bottom:none}
   .lbl{color:#64748b;flex-shrink:0}.val{font-weight:600;text-align:right;word-break:break-word}
+  .price-row .val{font-size:18px;color:#1e40af}
   .extras{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px}
   .tag{padding:6px 12px;border-radius:8px;font-size:12px;font-weight:600;text-align:center}
   .yes{background:#dcfce7;color:#166534}.no{background:#f1f5f9;color:#64748b}
@@ -271,6 +265,7 @@ ${companyName}`
     <div class="row"><span class="lbl">Date</span><span class="val">${date}</span></div>
     <div class="row"><span class="lbl">Time</span><span class="val">${time}</span></div>
     <div class="row"><span class="lbl">Passengers</span><span class="val">${passengers}</span></div>
+    <div class="row price-row"><span class="lbl">Total Price</span><span class="val">${priceFormatted}</span></div>
 
     <p class="label">Selected Extras</p>
     <div class="extras">
@@ -283,7 +278,7 @@ ${companyName}`
     <div class="pay-box">
       <h2>Complete Your Payment</h2>
       <p>Click below to pay securely and confirm your transfer.</p>
-      <a href="${paymentLink}" class="btn">Pay &amp; Confirm Booking</a>
+      <a href="${paymentLink}" class="btn">Pay ${priceFormatted} &amp; Confirm Booking</a>
     </div>
 
     <p class="note">Booking ID: ${bookingId}<br>Questions? Reply to this email and we'll be happy to help.</p>
@@ -297,50 +292,51 @@ ${companyName}`
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   EMAIL SENDER
+   STRIPE CHECKOUT SESSION
    ═══════════════════════════════════════════════════════════════ */
 
 /**
- * Send an email via nodemailer.
+ * Create a Stripe Checkout Session for the approved booking.
+ * Returns the session URL the customer will use to pay.
  *
- * If SMTP_HOST is not configured (development), the email is logged to the
- * console so the flow can be tested without a real mail server.
- *
- * Required env vars (set in api/.env):
- *   SMTP_HOST, SMTP_PORT, SMTP_SECURE, SMTP_USER, SMTP_PASS, SMTP_FROM
+ * If STRIPE_SECRET_KEY is not configured, returns null so the caller
+ * can fall back gracefully until keys are available.
  */
-async function sendEmail({ to, subject, text, html }) {
-  if (!process.env.SMTP_HOST) {
-    // Development fallback — print to console instead of sending
-    console.log('\n── [email] Would send ─────────────────────────────')
-    console.log(`To:      ${to}`)
-    console.log(`Subject: ${subject}`)
-    console.log('Text:\n' + text)
-    console.log('─────────────────────────────────────────────────\n')
-    return
+async function createCheckoutSession(booking, priceCents, frontendUrl) {
+  const key = process.env.STRIPE_SECRET_KEY
+  if (!key || key.includes('YOUR_')) {
+    console.warn('[stripe] STRIPE_SECRET_KEY not configured — skipping checkout session creation')
+    return null
   }
 
-  // Dynamic import keeps nodemailer out of the module scope during testing
-  // or when the dependency isn't installed, making the startup error clearer.
-  const nodemailer = (await import('nodemailer')).default
+  const stripe = new Stripe(key)
 
-  const transporter = nodemailer.createTransport({
-    host:   process.env.SMTP_HOST,
-    port:   parseInt(process.env.SMTP_PORT   || '587', 10),
-    secure: process.env.SMTP_SECURE === 'true',
-    auth: {
-      user: process.env.SMTP_USER,
-      pass: process.env.SMTP_PASS,
+  const session = await stripe.checkout.sessions.create({
+    payment_method_types: ['card'],
+    mode: 'payment',
+    line_items: [
+      {
+        price_data: {
+          currency:     'eur',
+          unit_amount:  priceCents,
+          product_data: {
+            name:        `Private Transfer — ${booking.pickup} → ${booking.destination}`,
+            description: `${booking.date} at ${booking.time} · ${booking.passengers} passenger(s)`,
+          },
+        },
+        quantity: 1,
+      },
+    ],
+    metadata: {
+      bookingId: booking.bookingId,
     },
+    customer_email: booking.customerEmail,
+    // Stripe replaces {CHECKOUT_SESSION_ID} in the URL automatically
+    success_url: `${frontendUrl}/payment-success?booking=${booking.bookingId}&session_id={CHECKOUT_SESSION_ID}`,
+    cancel_url:  `${frontendUrl}/booking`,
   })
 
-  await transporter.sendMail({
-    from:    process.env.SMTP_FROM || process.env.SMTP_USER,
-    to,
-    subject,
-    text,
-    html,
-  })
+  return session.url
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -349,9 +345,8 @@ async function sendEmail({ to, subject, text, html }) {
 
 /* ── POST /booking-request ────────────────────────────────────── */
 router.post('/', submitLimiter, async (req, res) => {
-  const { pickup, destination, date, time, passengers, extras, email } = req.body
+  const { pickup, destination, date, time, passengers, extras, email, distanceKm } = req.body
 
-  // Validate required fields
   if (!pickup || !destination || !date || !time || !email) {
     return res.status(400).json({ error: 'pickup, destination, date, time and email are required' })
   }
@@ -362,6 +357,8 @@ router.post('/', submitLimiter, async (req, res) => {
   if (pax < 1 || pax > 8) {
     return res.status(400).json({ error: 'Passengers must be between 1 and 8' })
   }
+
+  const parsedDistanceKm = distanceKm ? parseFloat(distanceKm) : null
 
   const bookingId     = newBookingId()
   const approvalToken = makeApprovalToken(bookingId)
@@ -383,34 +380,33 @@ router.post('/', submitLimiter, async (req, res) => {
     passengers:     pax,
     extras:         safeExtras,
     customerEmail:  String(email).trim().toLowerCase(),
+    distanceKm:     parsedDistanceKm,
     submittedAt,
-    status:         'pending', // pending | approved | rejected
-    // approvalToken is stored server-side; never exposed in API responses
+    status:         'pending', // pending | approved | rejected | paid
     _approvalToken: approvalToken,
-    // tokenUsed prevents replay after approval
     _tokenUsed:     false,
   }
 
-  bookingStore.set(bookingId, booking)
+  setBooking(bookingId, booking)
 
-  // Build the approval URL
   const baseUrl      = process.env.API_BASE_URL || `http://localhost:${process.env.PORT || 3001}`
   const approvalLink = `${baseUrl}/booking-request/${bookingId}/approve?token=${approvalToken}`
 
-  // Send notification to driver
   const driverEmailAddress = process.env.DRIVER_EMAIL || 'mateospace93@gmail.com'
-  console.log('[email] Attempting to send to:', driverEmailAddress)
-  console.log('[email] SMTP config — host:', process.env.SMTP_HOST, 'port:', process.env.SMTP_PORT, 'user:', process.env.SMTP_USER)
   try {
     const emailContent = driverEmailTemplate({ ...booking, approvalLink })
     await sendEmail({ to: driverEmailAddress, ...emailContent })
-    console.log('[email] Sent successfully')
+    console.log('[booking-request] Driver email sent')
   } catch (err) {
-    console.error('[email] FAILED:', err.message)
-    console.error('[email] Full error:', err)
+    console.error('[booking-request] Driver email failed:', err.message)
   }
 
-  console.log('[booking-request] Created', bookingId, { pickup: booking.pickup, destination: booking.destination, email: booking.customerEmail })
+  console.log('[booking-request] Created', bookingId, {
+    pickup: booking.pickup,
+    destination: booking.destination,
+    distanceKm: parsedDistanceKm,
+    email: booking.customerEmail,
+  })
 
   res.status(201).json({ bookingId, status: 'pending' })
 })
@@ -420,7 +416,7 @@ async function handleApprove(req, res) {
   const { id }    = req.params
   const { token } = req.query
 
-  const booking = bookingStore.get(id)
+  const booking = getBooking(id)
   if (!booking) {
     return res.status(404).json({ error: 'Booking not found' })
   }
@@ -437,32 +433,53 @@ async function handleApprove(req, res) {
     return res.status(409).json({ error: 'Booking was rejected and cannot be approved' })
   }
 
-  // Approve and burn the token
-  booking.status     = 'approved'
-  booking.approvedAt = new Date().toISOString()
-  booking._tokenUsed = true
-  bookingStore.set(id, booking)
+  // ── 1. Calculate price ─────────────────────────────────────────
+  const priceCents    = calculatePriceCents(booking.distanceKm ?? 0)
+  const priceFormatted = formatEuro(priceCents)
 
-  // Build payment link
-  // Replace PAYMENT_LINK_BASE with your real payment provider URL in production.
-  const paymentLink = process.env.PAYMENT_LINK_BASE
-    ? `${process.env.PAYMENT_LINK_BASE}?booking=${id}`
-    : `https://pay.quickride.com?booking=${id}` // TODO: replace with real payment link
+  // ── 2. Create Stripe Checkout Session ──────────────────────────
+  const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173'
+  let paymentLink
 
-  const companyName = process.env.COMPANY_NAME || 'QuickRide Croatia'
-
-  // Send approval + payment email to customer
   try {
-    const emailContent = customerApprovalEmailTemplate({ ...booking, paymentLink, companyName })
+    const sessionUrl = await createCheckoutSession(booking, priceCents, frontendUrl)
+    if (sessionUrl) {
+      paymentLink = sessionUrl
+      console.log('[booking-request] Stripe Checkout Session created for', id)
+    } else {
+      // Stripe not configured yet — use fallback URL so the rest of the flow still works
+      paymentLink = `${frontendUrl}/payment-success?booking=${id}&demo=1`
+      console.warn('[booking-request] Using fallback payment link (Stripe not configured)')
+    }
+  } catch (err) {
+    console.error('[booking-request] Stripe session creation failed:', err.message)
+    paymentLink = `${frontendUrl}/payment-success?booking=${id}&demo=1`
+  }
+
+  // ── 3. Update booking and burn token ───────────────────────────
+  booking.status        = 'approved'
+  booking.approvedAt    = new Date().toISOString()
+  booking._tokenUsed    = true
+  booking.priceCents    = priceCents
+  booking.priceFormatted = priceFormatted
+  booking.paymentLink   = paymentLink
+  setBooking(id, booking)
+
+  // ── 4. Email customer with payment link ────────────────────────
+  const companyName = process.env.COMPANY_NAME || 'QuickRide Croatia'
+  try {
+    const emailContent = customerApprovalEmailTemplate({
+      ...booking, paymentLink, companyName, priceFormatted,
+    })
     await sendEmail({ to: booking.customerEmail, ...emailContent })
     console.log('[booking-request] Approval email sent to', booking.customerEmail)
   } catch (err) {
     console.error('[booking-request] Customer email failed:', err.message)
   }
 
-  console.log('[booking-request] Approved', id)
+  console.log('[booking-request] Approved', id, { price: priceFormatted })
 
-  // If accessed via browser link (GET), return a friendly HTML confirmation page
+  // ── 5. Respond ─────────────────────────────────────────────────
   if (req.method === 'GET') {
     return res.send(`<!DOCTYPE html>
 <html lang="en">
@@ -474,27 +491,29 @@ async function handleApprove(req, res) {
   *{box-sizing:border-box;margin:0;padding:0}
   body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
        background:#f0fdf4;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
-  .card{background:#fff;border-radius:20px;padding:48px 40px;max-width:440px;
+  .card{background:#fff;border-radius:20px;padding:48px 40px;max-width:480px;
         text-align:center;box-shadow:0 8px 40px rgba(0,0,0,.1)}
   .icon{font-size:56px;margin-bottom:20px}
   h1{color:#166534;font-size:24px;font-weight:800;margin-bottom:12px}
-  p{color:#374151;font-size:15px;line-height:1.6}
+  p{color:#374151;font-size:15px;line-height:1.6;margin-bottom:8px}
   .id{margin-top:16px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;
       padding:8px 16px;font-size:13px;color:#15803d;font-weight:600}
+  .price{margin-top:12px;font-size:22px;font-weight:800;color:#1e40af}
 </style>
 </head>
 <body>
 <div class="card">
   <div class="icon">✅</div>
   <h1>Booking Approved!</h1>
-  <p>The booking has been approved and the customer will receive their invoice email shortly.</p>
+  <p>The customer will receive their payment link by email shortly.</p>
+  <div class="price">${priceFormatted}</div>
   <div class="id">Booking ID: ${id}</div>
 </div>
 </body>
 </html>`)
   }
 
-  res.json({ bookingId: id, status: 'approved' })
+  res.json({ bookingId: id, status: 'approved', priceCents, priceFormatted })
 }
 
 router.get( '/:id/approve', handleApprove)
@@ -505,7 +524,7 @@ router.post('/:id/reject', async (req, res) => {
   const { id }    = req.params
   const { token } = req.query
 
-  const booking = bookingStore.get(id)
+  const booking = getBooking(id)
   if (!booking) return res.status(404).json({ error: 'Booking not found' })
   if (!verifyApprovalToken(id, token)) return res.status(403).json({ error: 'Invalid token' })
   if (booking._tokenUsed) return res.status(409).json({ error: 'Token already used' })
@@ -516,28 +535,25 @@ router.post('/:id/reject', async (req, res) => {
   booking.status     = 'rejected'
   booking.rejectedAt = new Date().toISOString()
   booking._tokenUsed = true
-  bookingStore.set(id, booking)
+  setBooking(id, booking)
 
   console.log('[booking-request] Rejected', id)
   res.json({ bookingId: id, status: 'rejected' })
 })
 
 /* ── GET /booking-request/:id ─────────────────────────────────── */
-// Returns status publicly; returns full details only if valid token provided.
 router.get('/:id', (req, res) => {
   const { id }    = req.params
   const { token } = req.query
 
-  const booking = bookingStore.get(id)
+  const booking = getBooking(id)
   if (!booking) return res.status(404).json({ error: 'Booking not found' })
 
   if (token && verifyApprovalToken(id, token)) {
-    // Full view for admin (strip internal fields)
     const { _approvalToken, _tokenUsed, ...safe } = booking
     return res.json(safe)
   }
 
-  // Public: status only
   res.json({ bookingId: id, status: booking.status })
 })
 

@@ -29,23 +29,29 @@ export default function PlaceAutocomplete({
   const [open, setOpen]     = useState(false)
   const [active, setActive] = useState(-1)
   const inputRef            = useRef(null)
+  const justSelected        = useRef(false)
 
   const { results, loading, error } = usePlaceAutocomplete(value)
 
   const minChars = value.trim().length >= 2
   const showList = open && minChars
 
-  // Re-open and reset active index whenever suggestions change
+  // Re-open and reset active index whenever suggestions change,
+  // but skip the update that immediately follows a selection.
   useEffect(() => {
+    if (justSelected.current) {
+      justSelected.current = false
+      return
+    }
     if (minChars) setOpen(true)
     setActive(-1)
   }, [results, minChars])
 
   function select(place) {
+    justSelected.current = true
     onSelect(place)
     setOpen(false)
     setActive(-1)
-    inputRef.current?.blur()
   }
 
   function handleKeyDown(e) {

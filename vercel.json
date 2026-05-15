@@ -1,8 +1,15 @@
 {
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
-  "ignoreCommand": "git diff --quiet HEAD^ HEAD -- . ':(exclude)api'",
+  "framework": null,
   "rewrites": [
-    { "source": "/(.*)", "destination": "/$1.html" }
+    { "source": "/",                  "destination": "/index.html" },
+    { "source": "/booking",           "destination": "/booking.html" },
+    { "source": "/festivals",         "destination": "/festivals.html" },
+    { "source": "/day-trips",         "destination": "/day-trips.html" },
+    { "source": "/national-parks",    "destination": "/national-parks.html" },
+    { "source": "/about",             "destination": "/about.html" },
+    { "source": "/blog",              "destination": "/blog.html" },
+    { "source": "/payment-success",   "destination": "/payment-success.html" }
   ]
 }

@@ -3838,13 +3838,16 @@
   padding-bottom: 6.5rem;
 }
 
-/* Main section: pull card up so it overlaps into the blue hero */
+/* Main section: pull card up so it overlaps into the blue hero.
+   z-index must be > bk-mobile-cta (40) so popup overlays (time/date picker,
+   autocomplete) inside this stacking context paint above the sticky CTA bar.
+   Must stay < navbar (50) so the navbar remains on top while scrolling. */
 .bk-main--elevated {
   padding-top: 0;
   padding-bottom: 4rem;
   margin-top: -6rem;
   position: relative;
-  z-index: 10;
+  z-index: 41;
 }
 
 /* Single unified card that wraps the whole form */

@@ -105,7 +105,7 @@ export default function PlaceAutocomplete({
           onChange={e => onChange(e.target.value)}
           onKeyDown={handleKeyDown}
           onFocus={() => { if (minChars) setOpen(true) }}
-          onBlur={() => setOpen(false)}
+          onBlur={() => setTimeout(() => setOpen(false), 250)}
         />
         {loading && (
           <Loader2 className="place-ac-spin spinning" aria-hidden="true" />

@@ -239,7 +239,7 @@ export default function Booking() {
       {/* ── Unified booking card — floats over hero/white boundary ── */}
       <main className="bk-main bk-main--elevated" id="bk-form">
         <div className="container">
-          <form onSubmit={handleSubmit} className="bk-unified-card" noValidate>
+          <form id="booking-form" onSubmit={handleSubmit} className="bk-unified-card" noValidate>
 
             {/* ── Row 1: Pickup + Destination ──────────────────── */}
             <div className="bk-card-route">
@@ -473,6 +473,29 @@ export default function Booking() {
           </form>
         </div>
       </main>
+
+      {/* ── Sticky mobile CTA bar ────────────────────────────── */}
+      <div className="bk-mobile-cta" aria-hidden={step === 'submitting'}>
+        {submitError && (
+          <div className="bk-submit-error" role="alert" style={{ width: '100%', maxWidth: '28rem', marginBottom: '0.25rem' }}>
+            <AlertCircle aria-hidden="true" />
+            <span>{submitError}</span>
+          </div>
+        )}
+        <button
+          type="submit"
+          form="booking-form"
+          className="bk-mobile-cta-btn"
+          disabled={step === 'submitting'}
+        >
+          {step === 'submitting' ? (
+            <><Loader2 className="spinning" aria-hidden="true" />Submitting…</>
+          ) : (
+            <>Reserve My Ride <ChevronRight aria-hidden="true" /></>
+          )}
+        </button>
+        <p className="bk-mobile-cta-note">No payment upfront · Confirmed by your driver</p>
+      </div>
 
       {/* ── Trust points — below card, 2×2 grid ──────────────── */}
       <div className="bk-trust-below">

@@ -2615,6 +2615,7 @@
   font-weight: 600;
   color: var(--gray-600);
   cursor: pointer;
+  touch-action: manipulation;
   transition: background-color 0.15s, color 0.15s;
   font-family: inherit;
   display: flex;
@@ -2787,6 +2788,7 @@
   align-items: center;
   justify-content: center;
   gap: 0.625rem;
+  touch-action: manipulation;
   background: linear-gradient(135deg, var(--coastal-800), var(--coastal-600));
   color: #fff;
   font-size: 1.0625rem;
@@ -3108,6 +3110,7 @@
   font-weight: 500;
   color: var(--gray-600);
   cursor: pointer;
+  touch-action: manipulation;
   font-family: inherit;
   transition: border-color 0.15s, background-color 0.15s, color 0.15s;
 }
@@ -3248,6 +3251,7 @@
   display: flex;
   align-items: center;
   cursor: pointer;
+  touch-action: manipulation;
   text-align: left;
   width: 100%;
   font-family: inherit;
@@ -3452,6 +3456,7 @@
   display: flex;
   align-items: center;
   cursor: pointer;
+  touch-action: manipulation;
   text-align: left;
   width: 100%;
   font-family: inherit;
@@ -3592,8 +3597,10 @@
   font-weight: 500;
   color: var(--gray-400);
   scroll-snap-align: center;
+  scroll-snap-stop: always;
   cursor: pointer;
   user-select: none;
+  touch-action: manipulation;
   letter-spacing: 0.02em;
 }
 .tp-item:hover { color: var(--gray-700); }
@@ -3615,6 +3622,7 @@
   width: calc(100% - 2rem);
   margin: 0.75rem 1rem calc(1rem + env(safe-area-inset-bottom, 0px));
   padding: 0.75rem;
+  touch-action: manipulation;
   background: linear-gradient(135deg, var(--green-500), var(--green-600));
   color: #fff;
   font-weight: 700;
@@ -3691,9 +3699,11 @@
   display: flex;
   align-items: center;
   gap: 0.625rem;
-  padding: 0.625rem 0.75rem;
+  padding: 0.75rem 0.75rem;
+  min-height: 3rem;
   border-radius: 0.5rem;
   cursor: pointer;
+  touch-action: manipulation;
   font-size: 0.875rem;
   color: var(--gray-700);
   transition: background-color 0.1s;
@@ -4285,10 +4295,11 @@
   }
 }
 
-/* Inline submit button — green; full-width on desktop, auto on mobile */
+/* Inline submit button — hidden on mobile (sticky CTA handles it), full-width on desktop */
 .bk-submit-btn--inline {
-  flex: 0 0 auto;
-  width: auto !important;
+  display: none;
+  width: 100% !important;
+  flex: none;
   padding-left: 1.75rem;
   padding-right: 1.75rem;
   font-size: 0.9375rem;
@@ -4301,8 +4312,7 @@
 }
 @media (min-width: 1024px) {
   .bk-submit-btn--inline {
-    width: 100% !important;
-    flex: none;
+    display: flex;
   }
 }
 
